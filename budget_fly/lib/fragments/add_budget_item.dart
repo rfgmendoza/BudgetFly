@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+enum budgetItemType { creditCard, bill, subscription}
+
 class AddBudgetItem extends StatefulWidget {
   @override
   AddBudgetItemState createState() {
@@ -9,13 +11,17 @@ class AddBudgetItem extends StatefulWidget {
 
 class AddBudgetItemState extends State<AddBudgetItem> {
   final _formKey = GlobalKey<FormState>();
+  budgetItemType _itemType = budgetItemType.creditCard;
+  var name = "";
+  var amount = 0;
+  var dayDue = 1;
   @override
   Widget build(BuildContext context) {
     return Form(
         key: _formKey,
         child: Column(children: <Widget>[
           Padding(
-            padding: EdgeInsets.all(16.0),  
+            padding: EdgeInsets.all(8.0),  
             child: TextFormField(
               decoration: InputDecoration(
                 hintText: "Name",
@@ -26,9 +32,10 @@ class AddBudgetItemState extends State<AddBudgetItem> {
                 if (value.isEmpty) {
                   return 'Please enter some text';
                 }
-              })),
+              },
+              )),
               Padding(
-            padding: EdgeInsets.all(16.0),  
+            padding: EdgeInsets.all(8.0),  
             child: TextFormField(
               decoration: InputDecoration(
                 hintText: "Amount",
@@ -42,7 +49,7 @@ class AddBudgetItemState extends State<AddBudgetItem> {
                 }
               })),
               Padding(
-                padding: EdgeInsets.all(16.0),
+                padding: EdgeInsets.all(8.0),
                  
                 child: TextFormField(
                   decoration: InputDecoration(
@@ -59,6 +66,30 @@ class AddBudgetItemState extends State<AddBudgetItem> {
                   
                 )
               ),
+              RadioListTile<budgetItemType>(
+                title: const Text('Credit Card'),
+                value: budgetItemType.creditCard,
+                groupValue: _itemType,
+                onChanged: (budgetItemType value){ setState(() {
+                                  _itemType = value;
+                                });},
+              ),
+              RadioListTile<budgetItemType>(
+                title: const Text('Bill'),
+                value: budgetItemType.bill,
+                groupValue: _itemType,
+                onChanged: (budgetItemType value){ setState(() {
+                                  _itemType = value;
+                                });},
+              ),
+              RadioListTile<budgetItemType>(
+                title: const Text('Subscription'),
+                value: budgetItemType.subscription,
+                groupValue: _itemType,
+                onChanged: (budgetItemType value){ setState(() {
+                                  _itemType = value;
+                                });},
+              ),
           Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
               child: RaisedButton(
@@ -72,8 +103,9 @@ class AddBudgetItemState extends State<AddBudgetItem> {
                         SnackBar(content: Text('Processing Data')));
                   }
                 },
-                child: Text('Submit'),
+                child: Text('Add'),
               ))
+              
         ]));
   }
 }
