@@ -5,6 +5,7 @@ import 'dart:async';
 import 'dart:io' show Directory;
 import 'package:path_provider/path_provider.dart';
 
+
 enum budgetItemType { creditCard, bill, subscription }
 
 class DBCommon {
@@ -35,17 +36,18 @@ class DBCommon {
 
     BudgetItem mapToBudgetItem(Record record){
       BudgetItem _budgetItem = BudgetItem();
-      _budgetItem.name = record.value["name"].toString();
-      _budgetItem.amount = int.parse(record.value["amountDue"]);
-      _budgetItem.dayDue = int.parse(record.value["dayDue"]);
       
-      if(record.value["itemType"].toString().contains("credit")){
+      _budgetItem.name = record["name"].toString();
+      _budgetItem.amount = int.parse(record["amountDue"]);
+      _budgetItem.dayDue = int.parse(record["dayDue"]);
+      
+      if(record["itemType"].toString().contains("credit")){
         _budgetItem.itemType = budgetItemType.creditCard;
       }
-      else if(record.value["itemType"].toString().contains("bill")){
+      else if(record["itemType"].toString().contains("bill")){
         _budgetItem.itemType = budgetItemType.bill;
       }
-      else if(record.value["itemType"].toString().contains("subscription")){
+      else if(record["itemType"].toString().contains("subscription")){
         _budgetItem.itemType = budgetItemType.subscription;
       }
       else{//default

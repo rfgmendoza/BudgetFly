@@ -144,7 +144,7 @@ class AddBudgetItemState extends State<AddBudgetItem> {
     Store budgetStore = await DBCommon().getStore("budget");
     
     num count = await budgetStore.count();
-    List<Record> data = await budgetStore.findRecords(Finder());
+    
     if(count!=null)
     Scaffold
         .of(context)
