@@ -1,5 +1,5 @@
 
-import 'package:budget_fly/fragments/first_fragment.dart';
+import 'package:budget_fly/fragments/budget_list.dart';
 import 'package:budget_fly/fragments/add_budget_item.dart';
 import 'package:budget_fly/fragments/third_fragment.dart';
 import 'package:sembast/sembast.dart';
@@ -26,11 +26,11 @@ class HomePage extends StatefulWidget {
 
 class HomePageState extends State<HomePage> {
   int _selectedDrawerIndex = 0;
-
+  
   _getDrawerItemWidget(int pos) {
     switch (pos) {
       case 0:
-        return new FirstFragment();
+        return new BudgetList();
       case 1:
         return new AddBudgetItem();
       case 2:
