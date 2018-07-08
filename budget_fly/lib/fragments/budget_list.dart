@@ -4,16 +4,28 @@ import 'package:sembast/sembast.dart';
 import 'dart:async';
 import 'package:budget_fly/share/database_common.dart';
 import 'package:budget_fly/share/database_common.dart'
-    show budgetItemType, DBCommon, BudgetItem;
+    show DBCommon, BudgetItem;
 
 Future<List<_BudgetListItem>> fetchBudgetItems() async {
   final store = await DBCommon().getStore("budget");
-  List<Record> records = await store.records.toList();
   List<_BudgetListItem> items;
-  items = new List<_BudgetListItem>();
-  records.forEach((Record record){
-    items.add(new _BudgetListItem(DBCommon().mapToBudgetItem(record)));
-  });
+  if(store!=null){
+    List<Record> records=new List<Record>();
+    await for(var record in store.records){
+      if(record !=null)
+      records.add(record);
+    }    
+      
+    if(records != null){
+      items = new List<_BudgetListItem>();
+      records.forEach((Record record){
+        BudgetItem bi = DBCommon().mapToBudgetItem(record);
+        
+        _BudgetListItem bli = new _BudgetListItem(bi);
+        items.add(bli);
+      });
+    }
+  }
   return items;
 }
 
@@ -25,7 +37,7 @@ class BudgetList extends StatefulWidget {
 }
 
 class _BudgetListState extends State<BudgetList> {
-  List<BudgetItem> _budgetItems = new List<BudgetItem>();
+  
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<_BudgetListItem>>(
@@ -39,6 +51,9 @@ class _BudgetListState extends State<BudgetList> {
         
         if(snapshot.hasError)
           return Text("${snapshot.error}");
+        if(!snapshot.hasData){
+          return new Center(child: new Text("No data exists yet!"));
+        }  
         return CircularProgressIndicator();
       },
     );
@@ -54,6 +69,6 @@ class _BudgetListItem extends ListTile {
               " " +
               budgetItem.amount.toString() +
               " " +
-              budgetItem.itemType.toString()),
+              budgetItem.itemType.toString().split('.')[1]),
         );
 }

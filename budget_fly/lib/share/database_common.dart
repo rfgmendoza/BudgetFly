@@ -36,18 +36,18 @@ class DBCommon {
 
     BudgetItem mapToBudgetItem(Record record){
       BudgetItem _budgetItem = BudgetItem();
+      Map recordValue = record.value[0];
+      _budgetItem.name = recordValue["name"].trim();
+      _budgetItem.amount = int.parse(recordValue["amount"]);
+      _budgetItem.dayDue = int.parse(recordValue["dayDue"]);
       
-      _budgetItem.name = record["name"].toString();
-      _budgetItem.amount = int.parse(record["amountDue"]);
-      _budgetItem.dayDue = int.parse(record["dayDue"]);
-      
-      if(record["itemType"].toString().contains("credit")){
+      if(recordValue["itemType"].toString().contains("credit")){
         _budgetItem.itemType = budgetItemType.creditCard;
       }
-      else if(record["itemType"].toString().contains("bill")){
+      else if(recordValue["itemType"].toString().contains("bill")){
         _budgetItem.itemType = budgetItemType.bill;
       }
-      else if(record["itemType"].toString().contains("subscription")){
+      else if(recordValue["itemType"].toString().contains("subscription")){
         _budgetItem.itemType = budgetItemType.subscription;
       }
       else{//default
@@ -62,7 +62,7 @@ class DBCommon {
         "name": _budgetItem.name,
         "amount": _budgetItem.amount.toString(),
         "dayDue": _budgetItem.dayDue.toString(),
-        "itemType": _budgetItem.itemType.toString()
+        "itemType": _budgetItem.itemType.toString().split('.')[1]
       }
       ]);
       return budgetItemRecord;
