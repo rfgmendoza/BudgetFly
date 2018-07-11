@@ -6,8 +6,13 @@ import 'package:budget_fly/share/database_common.dart';
 import 'package:budget_fly/share/database_common.dart'
     show DBCommon, BudgetItem;
 
-Future<List<_BudgetListItem>> fetchBudgetItems() async {
+Future<Store> fetchBudgetItems() async {
   final store = await DBCommon().getStore("budget");
+  return store;
+}
+
+List<_BudgetListItem> _buildList(AsyncSnapshot snapshot){
+  Store store = snapshot.data;
   List<_BudgetListItem> items;
   if(store!=null){
     List<Record> records=new List<Record>();
