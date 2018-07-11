@@ -44,17 +44,18 @@ class _BudgetListState extends State<BudgetList> {
       future: fetchBudgetItems(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          return new ListView(
-              children: snapshot.data
-          );
-        }
-        
-        if(snapshot.hasError)
+          if(snapshot.data!=null){
+            return new ListView(
+                children: snapshot.data
+            );
+          }
+        }        
+        else if(snapshot.hasError)
           return Text("${snapshot.error}");
-        if(!snapshot.hasData){
-          return new Center(child: new Text("No data exists yet!"));
-        }  
-        return CircularProgressIndicator();
+        // if(!snapshot.hasData){
+        //   return new Center(child: new Text("No data exists yet!"));
+        // }  
+        else return new Center(child: CircularProgressIndicator());
       },
     );
   }
