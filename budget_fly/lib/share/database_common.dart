@@ -12,7 +12,7 @@ class DBCommon {
     static Database db;
         
 
-    void openDBConnection() async{
+    Future openDBConnection() async{
       if(db == null){
         Directory appDocDir = await getApplicationDocumentsDirectory();
         String dbPath = join(dirname(appDocDir.path), "sample.db");
@@ -21,13 +21,10 @@ class DBCommon {
       // We use the database factory to open the database
         db = await dbFactory.openDatabase(dbPath);
       }
-      else
-      return;
-      
-      
     }
+    
     Future<Store> getStore(String store) async {
-      openDBConnection();
+      await openDBConnection();
       if(db !=null)
         return db.getStore(store);
       else

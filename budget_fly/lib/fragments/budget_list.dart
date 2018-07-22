@@ -6,30 +6,27 @@ import 'package:budget_fly/share/database_common.dart';
 import 'package:budget_fly/share/database_common.dart'
     show DBCommon, BudgetItem;
 
-Future<Store> fetchBudgetItems() async {
-  final store = await DBCommon().getStore("budget");
-  return store;
+Future<List<Record>> fetchBudgetItems() async {
+  Store storeOut;
+  await DBCommon().getStore("budget")
+    .then((store)=>
+      storeOut=store);
+  
+  if(storeOut !=null)
+    return storeOut.records.toList();
+  else
+    return null;
 }
 
-List<_BudgetListItem> _buildList(AsyncSnapshot snapshot){
-  Store store = snapshot.data;
-  List<_BudgetListItem> items;
-  if(store!=null){
-    List<Record> records=new List<Record>();
-    await for(var record in store.records){
-      if(record !=null)
-      records.add(record);
-    }    
-      
-    if(records != null){
-      items = new List<_BudgetListItem>();
-      records.forEach((Record record){
-        BudgetItem bi = DBCommon().mapToBudgetItem(record);
-        
-        _BudgetListItem bli = new _BudgetListItem(bi);
-        items.add(bli);
-      });
-    }
+List<_BudgetListItem> _buildList(AsyncSnapshot snapshot) {
+  List<Record> records = snapshot.data;
+  List<_BudgetListItem> items= new List<_BudgetListItem>();
+  if(records!=null){
+    records.forEach((Record record){
+      BudgetItem bi = DBCommon().mapToBudgetItem(record);
+      items.add(new _BudgetListItem(bi));
+    });
+    
   }
   return items;
 }
@@ -45,13 +42,18 @@ class _BudgetListState extends State<BudgetList> {
   
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<_BudgetListItem>>(
+    return FutureBuilder<List<Record>>(
       future: fetchBudgetItems(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           if(snapshot.data!=null){
-            return new ListView(
-                children: snapshot.data
+            return new Column(children: <Widget>[
+              new Expanded(
+                child: new ListView(
+                  children: _buildList(snapshot,)
+                )
+              )
+            ],
             );
           }
         }        
