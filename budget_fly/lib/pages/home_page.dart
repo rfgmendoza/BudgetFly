@@ -2,7 +2,7 @@
 import 'package:budget_fly/fragments/budget_list.dart';
 import 'package:budget_fly/fragments/add_budget_item.dart';
 import 'package:budget_fly/fragments/third_fragment.dart';
-import 'package:sembast/sembast.dart';
+
 import 'package:flutter/material.dart';
 
 class DrawerItem {
@@ -13,8 +13,8 @@ class DrawerItem {
 
 class HomePage extends StatefulWidget {
   final drawerItems = [
-    new DrawerItem("Fragment 1", Icons.rss_feed),
-    new DrawerItem("Add Budget Item", Icons.local_pizza),
+    new DrawerItem("Budget List", Icons.list),
+    new DrawerItem("Add Budget Item", Icons.add),
     new DrawerItem("Fragment 3", Icons.info)
   ];
 

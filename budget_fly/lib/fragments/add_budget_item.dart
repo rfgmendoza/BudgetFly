@@ -13,7 +13,7 @@ class AddBudgetItem extends StatefulWidget {
 
 class AddBudgetItemState extends State<AddBudgetItem> {
   final _formKey = GlobalKey<FormState>();
-  budgetItemType _itemType = budgetItemType.creditCard;
+  
   BudgetItem _budgetItem = BudgetItem();
   
   @override
@@ -144,7 +144,7 @@ class AddBudgetItemState extends State<AddBudgetItem> {
     Store budgetStore = await DBCommon().getStore("budget");
     
     num count = await budgetStore.count();
-    List<Record> data = await budgetStore.findRecords(Finder());
+    
     if(count!=null)
     Scaffold
         .of(context)
