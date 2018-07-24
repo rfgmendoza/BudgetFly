@@ -6,6 +6,7 @@ import 'dart:io' show Directory;
 import 'package:path_provider/path_provider.dart';
 
 
+
 enum budgetItemType { creditCard, bill, subscription }
 
 class DBCommon {
@@ -36,7 +37,8 @@ class DBCommon {
       Map recordValue = record.value[0];
       _budgetItem.name = recordValue["name"].trim();
       _budgetItem.amount = int.parse(recordValue["amount"]);
-      _budgetItem.dayDue = int.parse(recordValue["dayDue"]);
+      
+      _budgetItem.dayDue =  int.parse(recordValue["dayDue"]);
       
       if(recordValue["itemType"].toString().contains("credit")){
         _budgetItem.itemType = budgetItemType.creditCard;
@@ -72,4 +74,6 @@ class BudgetItem {
   num amount = 0;
   num dayDue = 1;
   budgetItemType itemType = budgetItemType.creditCard;
+
+  
 }

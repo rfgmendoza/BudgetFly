@@ -21,15 +21,34 @@ Future<List<Record>> fetchBudgetItems() async {
 List<_BudgetListItem> _buildList(AsyncSnapshot snapshot) {
   List<Record> records = snapshot.data;
   List<_BudgetListItem> items= new List<_BudgetListItem>();
+  List<_BudgetListItem> topItems = new List<_BudgetListItem>();
   if(records!=null){
+    records.sort(
+      (a,b)=>
+          int.parse(a.value[0]["dayDue"]).compareTo(int.parse(b.value[0]["dayDue"]))
+              );
+
+    // records.forEach((Record record){
+    //   if 
+    // });          
+    DateTime now = new DateTime.now();
+    
     records.forEach((Record record){
       BudgetItem bi = DBCommon().mapToBudgetItem(record);
-      items.add(new _BudgetListItem(bi));
+      if(bi.dayDue.compareTo(19)>=0){
+        topItems.add(new _BudgetListItem(bi));
+      }
+      else{
+        items.add(new _BudgetListItem(bi));
+      }
     });
+    topItems.addAll(items);
     
   }
-  return items;
+  return topItems;
 }
+
+
 
 class BudgetList extends StatefulWidget {
   BudgetList({Key key}) : super(key: key);
