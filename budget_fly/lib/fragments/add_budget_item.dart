@@ -1,23 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:sembast/sembast.dart';
+import 'dart:async';
 import 'package:budget_fly/share/database_common.dart' show budgetItemType, DBCommon, BudgetItem;
 
 
 class AddBudgetItem extends StatefulWidget {
-  
+  final String recordKey;
+  final ValueNotifier<Widget> notifier;
+  AddBudgetItem({Key key, this.recordKey, this.notifier}) : super(key:key);
+
   @override
   AddBudgetItemState createState() {
-    return AddBudgetItemState();
+    return AddBudgetItemState(recordKey: recordKey, notifier: notifier);
   }
 }
 
 class AddBudgetItemState extends State<AddBudgetItem> {
   final _formKey = GlobalKey<FormState>();
-  
+  final String recordKey;
+  final ValueNotifier<Widget> notifier;
   BudgetItem _budgetItem = BudgetItem();
+
+  AddBudgetItemState({this.recordKey, this.notifier}) : super();
+
+  
   
   @override
   Widget build(BuildContext context) {
+    if(recordKey != null && recordKey !=""){
+      getBudgetItemFromStore(recordKey);
+      
+    }
     return Form(
         key: _formKey,
         child: Column(children: <Widget>[
@@ -135,8 +148,14 @@ class AddBudgetItemState extends State<AddBudgetItem> {
   void addtoLocalStore(BuildContext context) async {
     
     Store budgetStore = await DBCommon().getStore("budget");
-    Record budgetItem = DBCommon().maptoRecord(budgetStore, _budgetItem);
-    DBCommon.db.putRecord(budgetItem);
+    Record budgetItemRecord = DBCommon().maptoRecord(budgetStore, _budgetItem);
+
+    if(recordKey !=null || recordKey != ""){
+      DBCommon.db.put(recordKey,budgetItemRecord); 
+    }
+
+    
+    DBCommon.db.putRecord(budgetItemRecord);
   }
 
   void checkLocalStore(BuildContext context) async {
@@ -150,6 +169,18 @@ class AddBudgetItemState extends State<AddBudgetItem> {
         .of(context)
         .showSnackBar(SnackBar(content: Text(count.toString())));
 
+  }
+
+  getBudgetItemFromStore(String key) async{
+    
+    Store store = await DBCommon().getStore("budget");
+    await store.getRecord(key).then((record){
+      this._budgetItem = DBCommon().mapToBudgetItem(record);
+    });
+    
+
+
+        
   }
 }
 

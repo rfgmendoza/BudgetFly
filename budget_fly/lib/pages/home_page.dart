@@ -17,7 +17,8 @@ class HomePage extends StatefulWidget {
     new DrawerItem("Add Budget Item", Icons.add),
     new DrawerItem("Fragment 3", Icons.info)
   ];
-
+  HomePage(): super(listenable: ValueNotifier<Widget>(null));
+  ValueNotifier<Widget> get notifier => listenable as ValueNotifier<Widget>;
   @override
   State<StatefulWidget> createState() {
     return new HomePageState();
@@ -26,13 +27,14 @@ class HomePage extends StatefulWidget {
 
 class HomePageState extends State<HomePage> {
   int _selectedDrawerIndex = 0;
-  
+  HomePageState(): super(listenable: ValueNotifier<Widget>(null));  ValueNotifier<Widget> get notifier => Listenable as ValueNotifier<Widget>;
+
   _getDrawerItemWidget(int pos) {
     switch (pos) {
       case 0:
         return new BudgetList();
       case 1:
-        return new AddBudgetItem();
+        return new AddBudgetItem(recordKey: "",);
       case 2:
         return new ThirdFragment();
 
@@ -42,7 +44,8 @@ class HomePageState extends State<HomePage> {
   }
   
   _onSelectItem(int index) {
-    setState(() => _selectedDrawerIndex = index);
+    //setState(() => _selectedDrawerIndex = index);
+    this.notifier = _getDrawerItemWidget(index);
     Navigator.of(context).pop(); // close the drawer
   }
 
@@ -76,7 +79,7 @@ class HomePageState extends State<HomePage> {
           ],
         ),
       ),
-      body: _getDrawerItemWidget(_selectedDrawerIndex),
+      body: _notifySelect.value ?? BudgetList(notifier),
     );
   }
 }
