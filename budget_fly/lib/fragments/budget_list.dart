@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:sembast/sembast.dart';
-import 'package:budget_fly/fragments/add_budget_item.dart';
 import 'dart:async';
 import 'package:budget_fly/share/database_common.dart';
 import 'package:budget_fly/share/database_common.dart'
@@ -19,7 +18,7 @@ Future<List<Record>> fetchBudgetItems() async {
     return null;
 }
 
-List<_BudgetListItem> _buildList(AsyncSnapshot snapshot, BuildContext context, ValueNotifier<Widget> notifier) {
+List<_BudgetListItem> _buildList(AsyncSnapshot snapshot) {
   List<Record> records = snapshot.data;
   List<_BudgetListItem> items= new List<_BudgetListItem>();
   List<_BudgetListItem> topItems = new List<_BudgetListItem>();
@@ -36,11 +35,11 @@ List<_BudgetListItem> _buildList(AsyncSnapshot snapshot, BuildContext context, V
     
     records.forEach((Record record){
       BudgetItem bi = DBCommon().mapToBudgetItem(record);
-      if(bi.dayDue.compareTo(now.day)>=0){
-        topItems.add(new _BudgetListItem(bi, context, notifier));
+      if(bi.dayDue.compareTo(19)>=0){
+        topItems.add(new _BudgetListItem(bi));
       }
       else{
-        items.add(new _BudgetListItem(bi, context, notifier));
+        items.add(new _BudgetListItem(bi));
       }
     });
     topItems.addAll(items);
@@ -52,18 +51,14 @@ List<_BudgetListItem> _buildList(AsyncSnapshot snapshot, BuildContext context, V
 
 
 class BudgetList extends StatefulWidget {
-  final ValueNotifier<Widget> notifier;
-  BudgetList({Key key, this.notifier}) : super(key: key);
+  BudgetList({Key key}) : super(key: key);
 
   @override
-  _BudgetListState createState() => new _BudgetListState(notifier);
+  _BudgetListState createState() => new _BudgetListState();
 }
 
-class _BudgetListState extends State<BudgetList>{
-  final ValueNotifier<Widget> notifier;
-
-  _BudgetListState(this.notifier);
-
+class _BudgetListState extends State<BudgetList> {
+  
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<Record>>(
@@ -74,7 +69,7 @@ class _BudgetListState extends State<BudgetList>{
             return new Column(children: <Widget>[
               new Expanded(
                 child: new ListView(
-                  children: _buildList(snapshot,context, notifier)
+                  children: _buildList(snapshot,)
                 )
               )
             ],
@@ -93,7 +88,7 @@ class _BudgetListState extends State<BudgetList>{
 }
 
 class _BudgetListItem extends ListTile {
-  _BudgetListItem(BudgetItem budgetItem, BuildContext context, ValueNotifier<Widget> notifier)
+  _BudgetListItem(BudgetItem budgetItem)
       : super(
           isThreeLine: true,
           title: new Text(budgetItem.name),
@@ -102,14 +97,5 @@ class _BudgetListItem extends ListTile {
               budgetItem.amount.toString() +
               " " +
               budgetItem.itemType.toString().split('.')[1]),
-          onTap: () { _editBudgetItem(context, budgetItem, notifier); }
         );
 }
-
-_editBudgetItem(BuildContext context, BudgetItem budgetItem, ValueNotifier<Widget> notifier){
-    notifier.value = AddBudgetItem(recordKey: budgetItem.key, notifier: notifier);
-    // Widget
-    // Navigator.defaultRouteName;
-    // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => AddBudgetItem(recordKey: budgetItem.key,)));
-}
-

@@ -52,12 +52,6 @@ class DBCommon {
       else{//default
         _budgetItem.itemType = budgetItemType.creditCard;
       }
-      if(record.key!=null){
-      _budgetItem.key = record.key.toString();
-      }
-      else{
-        _budgetItem.key="";
-      }
       return _budgetItem;
     }
 
@@ -67,7 +61,7 @@ class DBCommon {
         "name": _budgetItem.name,
         "amount": _budgetItem.amount.toString(),
         "dayDue": _budgetItem.dayDue.toString(),
-        "itemType": _budgetItem.itemType.toString().split('.')[1],        
+        "itemType": _budgetItem.itemType.toString().split('.')[1]
       }
       ]);
       return budgetItemRecord;
@@ -80,6 +74,6 @@ class BudgetItem {
   num amount = 0;
   num dayDue = 1;
   budgetItemType itemType = budgetItemType.creditCard;
-  String key;
+
   
 }
