@@ -1,5 +1,7 @@
 
 import 'package:budget_fly/pages/home_page.dart';
+import 'package:budget_fly/fragments/budget_list.dart';
+import 'package:budget_fly/fragments/add_budget_item.dart';
 import 'package:flutter/material.dart';
 
 void main() => runApp(new MyApp());
@@ -13,7 +15,7 @@ class MyApp extends StatelessWidget {
       theme: new ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: new HomePage(),
+      home: new BudgetList(),
     );
   }
 }
