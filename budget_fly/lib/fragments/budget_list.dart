@@ -68,20 +68,44 @@ class _BudgetListState extends State<BudgetList> {
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               if (snapshot.data != null) {
+                List<BudgetItem> items = _buildList(snapshot);
                 return new Column(
                   children: <Widget>[
                     new Expanded(
-                        child: new ListView(
-                            children: _buildList(snapshot)
-                                .map((BudgetItem budgetItem) {
-                      return ListTile(
-                        title: Text(budgetItem.name),
-                        subtitle: Text(_formateSubtitle(budgetItem)),
-                        onTap: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (context)=>new AddBudgetItem(budgetItem: budgetItem)));
-                        },
-                      );
-                    }).toList()))
+                        child: ListView.builder(
+                          itemCount: items.length,
+                          itemBuilder: (context, index) {
+                            final item = items[index];
+                            return Dismissible(
+                              key: Key(item.record.key),
+                              onDismissed: (direction) {
+                                setState(() {
+                                   items.removeAt(index);
+                                                                                                     
+                                });
+                              },
+                              
+                            );
+                          },
+                          )
+                        
+                        
+                        
+                    //     new ListView(
+                    //         children: _buildList(snapshot)
+                    //             .map((BudgetItem budgetItem) {
+                    //   return ListTile(
+                    //     title: Text(budgetItem.name),
+                    //     subtitle: Text(_formateSubtitle(budgetItem)),
+                    //     onTap: () {
+                    //       Navigator.push(
+                    //           context,
+                    //           MaterialPageRoute(
+                    //               builder: (context) => new AddBudgetItem(
+                    //                   budgetItem: budgetItem)));
+                    //     },
+                    //   );
+                    // }).toList()))
                   ],
                 );
               }
@@ -93,8 +117,7 @@ class _BudgetListState extends State<BudgetList> {
             else
               return new Center(child: CircularProgressIndicator());
           },
-        )
-    );
+        ));
   }
 }
 

@@ -73,6 +73,14 @@ class DBCommon {
     }
     return budgetItemRecord;
   }
+
+  deleteBudgetItem(Record record) async{
+    if(db == null){
+      openDBConnection();
+      
+    }
+    await DBCommon.db.deleteRecord(record);
+  }
 }
 
 class BudgetItem {

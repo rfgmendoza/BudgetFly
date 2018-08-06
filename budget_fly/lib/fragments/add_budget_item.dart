@@ -152,10 +152,9 @@ class AddBudgetItemState extends State<AddBudgetItem> {
     
     Store budgetStore = await DBCommon().getStore("budget");
       Record budgetItem = DBCommon().maptoRecord(budgetStore, _budgetItem);
-    if(budgetItem.key != null){
-    
-      await DBCommon.db.deleteRecord(budgetItem);
-      
+    if(budgetItem.key != null){    
+      await DBCommon().deleteBudgetItem(budgetItem);
+           
     }
     DBCommon.db.putRecord(budgetItem);
 
