@@ -58,8 +58,6 @@ class _BudgetListState extends State<BudgetList> {
   Future<List<Record>> budgetItemsFuture = fetchBudgetItems();
   @override
   Widget build(BuildContext context) {
-    
-
     return new Scaffold(
         appBar: new AppBar(
           // here we display the title corresponding to the fragment
@@ -77,42 +75,38 @@ class _BudgetListState extends State<BudgetList> {
                   children: <Widget>[
                     new Expanded(
                         child: ListView.builder(
-                          itemCount: items.length,
-                          itemBuilder: (context, index) {
-                            final item = items[index];
-                            return Dismissible(
-                              key: Key(item.record.toString()),
-                              onDismissed: (direction) {
-                                DBCommon().deleteBudgetItem(item.record);
+                      itemCount: items.length,
+                      itemBuilder: (context, index) {
+                        final item = items[index];
+                        return Dismissible(
+                            key: Key(item.record.toString()),
+                            onDismissed: (direction) {
+                              DBCommon().deleteBudgetItem(item.record);
 
-                                
+                              Scaffold.of(context).showSnackBar(SnackBar(
+                                  content: Text("budget item removed")));
 
-                                Scaffold
+                              sleep(const Duration(seconds: 2));
+
+                              Navigator
                                   .of(context)
-                                  .showSnackBar(SnackBar(
-                                    content: Text("budget item removed")));
-
-                                sleep(const Duration(seconds:2));
-
-                                //Navigator.of(context).pushReplacementNamed('/list');
+                                  .pushReplacementNamed('/list');
+                            },
+                            background: Container(color: Colors.red),
+                            child: ListTile(
+                              title:
+                                  Text(item.record.key.toString() + item.name),
+                              subtitle: Text(_formateSubtitle(item)),
+                              onTap: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => new AddBudgetItem(
+                                            budgetItem: item)));
                               },
-                              background: Container(color: Colors.red),
-                              child:ListTile(
-                        title: Text(item.record.key.toString() + item.name),
-                        subtitle: Text(_formateSubtitle(item)),
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => new AddBudgetItem(
-                                      budgetItem: item)));
-                        },
-                              
-                      ) 
-                            );
-                          },
-                          ))
-                        
+                            ));
+                      },
+                    ))
                   ],
                 );
               }

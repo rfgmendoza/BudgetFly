@@ -18,19 +18,20 @@ class AddBudgetItemState extends State<AddBudgetItem> {
   final _formKey = GlobalKey<FormState>();
 
   BudgetItem _budgetItem = BudgetItem();
-
+  bool editMode = false;
   @override
   Widget build(BuildContext context) {
     if (widget.budgetItem != null) {
       this._budgetItem = widget.budgetItem;
+      editMode = true;
     }
     return new Scaffold(
         appBar: new AppBar(
           // here we display the title corresponding to the fragment
           // you can instead choose to have a static title
-          title: new Text("test"),
+          title: editMode ? new Text("Edit Budget Item") : new Text("Add Budget Item"),
         ),
-        drawer: getDrawer(context),
+        drawer: editMode? null : getDrawer(context),
         body: Form(
             key: _formKey,
             child: SingleChildScrollView(child: Column(children: <Widget>[
