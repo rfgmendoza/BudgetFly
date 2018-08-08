@@ -4,6 +4,7 @@ import 'package:sembast/sembast.dart';
 import 'package:budget_fly/pages/home_page.dart';
 import '../fragments/add_budget_item.dart';
 import 'dart:async';
+import 'dart:io';
 import 'package:budget_fly/share/database_common.dart'
     show DBCommon, BudgetItem;
 
@@ -54,8 +55,11 @@ class BudgetList extends StatefulWidget {
 }
 
 class _BudgetListState extends State<BudgetList> {
+  Future<List<Record>> budgetItemsFuture = fetchBudgetItems();
   @override
   Widget build(BuildContext context) {
+    
+
     return new Scaffold(
         appBar: new AppBar(
           // here we display the title corresponding to the fragment
@@ -64,7 +68,7 @@ class _BudgetListState extends State<BudgetList> {
         ),
         drawer: getDrawer(context),
         body: FutureBuilder<List<Record>>(
-          future: fetchBudgetItems(),
+          future: budgetItemsFuture,
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               if (snapshot.data != null) {
@@ -77,35 +81,38 @@ class _BudgetListState extends State<BudgetList> {
                           itemBuilder: (context, index) {
                             final item = items[index];
                             return Dismissible(
-                              key: Key(item.record.key),
+                              key: Key(item.record.toString()),
                               onDismissed: (direction) {
-                                setState(() {
-                                   items.removeAt(index);
-                                                                                                     
-                                });
+                                DBCommon().deleteBudgetItem(item.record);
+
+                                
+
+                                Scaffold
+                                  .of(context)
+                                  .showSnackBar(SnackBar(
+                                    content: Text("budget item removed")));
+
+                                sleep(const Duration(seconds:2));
+
+                                //Navigator.of(context).pushReplacementNamed('/list');
                               },
+                              background: Container(color: Colors.red),
+                              child:ListTile(
+                        title: Text(item.record.key.toString() + item.name),
+                        subtitle: Text(_formateSubtitle(item)),
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => new AddBudgetItem(
+                                      budgetItem: item)));
+                        },
                               
+                      ) 
                             );
                           },
-                          )
+                          ))
                         
-                        
-                        
-                    //     new ListView(
-                    //         children: _buildList(snapshot)
-                    //             .map((BudgetItem budgetItem) {
-                    //   return ListTile(
-                    //     title: Text(budgetItem.name),
-                    //     subtitle: Text(_formateSubtitle(budgetItem)),
-                    //     onTap: () {
-                    //       Navigator.push(
-                    //           context,
-                    //           MaterialPageRoute(
-                    //               builder: (context) => new AddBudgetItem(
-                    //                   budgetItem: budgetItem)));
-                    //     },
-                    //   );
-                    // }).toList()))
                   ],
                 );
               }

@@ -16,6 +16,11 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: new BudgetList(),
+      routes: <String, WidgetBuilder> {
+        '/list': (BuildContext context) => new BudgetList(),
+        '/add': (BuildContext context) => new AddBudgetItem(),
+      
+      }
     );
   }
 }
