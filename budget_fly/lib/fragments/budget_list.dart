@@ -6,7 +6,7 @@ import '../fragments/add_budget_item.dart';
 import 'dart:async';
 import 'dart:io';
 import 'package:budget_fly/share/database_common.dart'
-    show DBCommon, BudgetItem;
+    show DBCommon, BudgetItem, BudgetItemType;
 
 Future<List<Record>> fetchBudgetItems() async {
   Store storeOut;
@@ -34,7 +34,7 @@ List<BudgetItem> _buildList(AsyncSnapshot snapshot) {
 
     records.forEach((Record record) {
       BudgetItem bi = DBCommon().mapToBudgetItem(record);
-      if (bi.dayDue.compareTo(19) >= 0) {
+      if (bi.dayDue.compareTo(now.day) >= 0) {
         topItems.add(bi);
       } else {
         items.add(bi);
@@ -92,11 +92,11 @@ class _BudgetListState extends State<BudgetList> {
                                   .of(context)
                                   .pushReplacementNamed('/list');
                             },
-                            background: Container(color: Colors.red),
+                            background: Container(color: Colors.red, ),
                             child: ListTile(
                               title:
-                                  Text(item.record.key.toString() + item.name),
-                              subtitle: Text(_formateSubtitle(item)),
+                                  Text(item.name.toUpperCase()),
+                              subtitle:  _formateSubtitle(item),
                               onTap: () {
                                 Navigator.push(
                                     context,
@@ -104,6 +104,8 @@ class _BudgetListState extends State<BudgetList> {
                                         builder: (context) => new AddBudgetItem(
                                             budgetItem: item)));
                               },
+                              leading: _getIcon(item),
+                              trailing: Icon(Icons.edit),                              
                             ));
                       },
                     ))
@@ -122,10 +124,55 @@ class _BudgetListState extends State<BudgetList> {
   }
 }
 
-_formateSubtitle(BudgetItem budgetItem) {
-  String subtitle = "";
-  subtitle += "\$" + budgetItem.amount.toString();
-  subtitle += " due on: " + budgetItem.dayDue.toString();
+_getIcon(BudgetItem budgetItem){
+
+  switch (budgetItem.itemType) {
+    case BudgetItemType.bill: 
+      return Icon(Icons.mail_outline);
+      break;
+    case BudgetItemType.creditCard:
+      return Icon(Icons.credit_card);
+      break;
+    case BudgetItemType.subscription:
+      return Icon(Icons.subscriptions);
+      break;
+    default:
+      return Icon(Icons.attach_money);
+  }
+}
+
+RichText _formateSubtitle(BudgetItem budgetItem) {
+
+
+  RichText subtitle = new RichText(
+    text: new TextSpan(
+        children: <TextSpan>[
+          new TextSpan(
+            text: "\$"+budgetItem.amount.toString()+"     ",
+            style: new TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.black
+              )
+          ),
+          new TextSpan(
+            text: "due on: ",
+            style: TextStyle(color: Colors.black)
+          ),          
+          new TextSpan(
+            text: budgetItem.dayDue.toString(),
+            style: new TextStyle(
+              color: Colors.blue, 
+              fontWeight: FontWeight.bold, 
+              
+              ),
+            
+            
+          )
+        ]
+      )
+    );
+  //subtitle += "\$" + budgetItem.amount.toString();
+  //subtitle += " due on: " + budgetItem.dayDue.toString();
   return subtitle;
 }
 

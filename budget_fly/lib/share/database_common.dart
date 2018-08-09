@@ -5,7 +5,7 @@ import 'dart:async';
 import 'dart:io' show Directory;
 import 'package:path_provider/path_provider.dart';
 
-enum budgetItemType { creditCard, bill, subscription }
+enum BudgetItemType { creditCard, bill, subscription }
 
 class DBCommon {
   static Database db;
@@ -38,14 +38,14 @@ class DBCommon {
     _budgetItem.dayDue = int.parse(recordValue["dayDue"]);
 
     if (recordValue["itemType"].toString().contains("credit")) {
-      _budgetItem.itemType = budgetItemType.creditCard;
+      _budgetItem.itemType = BudgetItemType.creditCard;
     } else if (recordValue["itemType"].toString().contains("bill")) {
-      _budgetItem.itemType = budgetItemType.bill;
+      _budgetItem.itemType = BudgetItemType.bill;
     } else if (recordValue["itemType"].toString().contains("subscription")) {
-      _budgetItem.itemType = budgetItemType.subscription;
+      _budgetItem.itemType = BudgetItemType.subscription;
     } else {
       //default
-      _budgetItem.itemType = budgetItemType.creditCard;
+      _budgetItem.itemType = BudgetItemType.creditCard;
     }
     _budgetItem.record = record;
     return _budgetItem;
@@ -87,7 +87,7 @@ class BudgetItem {
   String name;
   num amount;
   num dayDue;
-  budgetItemType itemType;
+  BudgetItemType itemType;
   Record record;
 
   BudgetItem() {
@@ -95,6 +95,6 @@ class BudgetItem {
     name = null;
     amount = null;
     dayDue = null;
-    itemType = budgetItemType.creditCard;
+    itemType = BudgetItemType.creditCard;
   }
 }

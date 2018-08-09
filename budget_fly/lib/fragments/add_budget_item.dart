@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sembast/sembast.dart';
 import 'package:budget_fly/pages/home_page.dart';
 import 'package:budget_fly/share/database_common.dart'
-    show budgetItemType, DBCommon, BudgetItem;
+    show BudgetItemType, DBCommon, BudgetItem;
 
 class AddBudgetItem extends StatefulWidget {
   final BudgetItem budgetItem;
@@ -88,31 +88,31 @@ class AddBudgetItemState extends State<AddBudgetItem> {
                                   .toString();
                         }
                       })),
-              RadioListTile<budgetItemType>(
+              RadioListTile<BudgetItemType>(
                 title: const Text('Credit Card'),
-                value: budgetItemType.creditCard,
+                value: BudgetItemType.creditCard,
                 groupValue: _budgetItem.itemType,
-                onChanged: (budgetItemType value) {
+                onChanged: (BudgetItemType value) {
                   setState(() {
                     _budgetItem.itemType = value;
                   });
                 },
               ),
-              RadioListTile<budgetItemType>(
+              RadioListTile<BudgetItemType>(
                 title: const Text('Bill'),
-                value: budgetItemType.bill,
+                value: BudgetItemType.bill,
                 groupValue: _budgetItem.itemType,
-                onChanged: (budgetItemType value) {
+                onChanged: (BudgetItemType value) {
                   setState(() {
                     _budgetItem.itemType = value;
                   });
                 },
               ),
-              RadioListTile<budgetItemType>(
+              RadioListTile<BudgetItemType>(
                 title: const Text('Subscription'),
-                value: budgetItemType.subscription,
+                value: BudgetItemType.subscription,
                 groupValue: _budgetItem.itemType,
-                onChanged: (budgetItemType value) {
+                onChanged: (BudgetItemType value) {
                   setState(() {
                     _budgetItem.itemType = value;
                   });
