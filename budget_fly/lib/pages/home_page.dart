@@ -1,7 +1,7 @@
 
 import '../fragments/budget_list.dart';
 import '../fragments/add_budget_item.dart';
-import 'package:budget_fly/fragments/third_fragment.dart';
+import 'package:budget_fly/fragments/budget_config.dart';
 
 import 'package:flutter/material.dart';
 
