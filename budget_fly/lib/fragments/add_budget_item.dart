@@ -133,7 +133,7 @@ class AddBudgetItemState extends State<AddBudgetItem> {
                         addtoLocalStore(context);
                       }
                     },
-                    child: Text('Add'),
+                    child: !editMode ? Text('Add'):Text('Save'),
                   )),
               // Padding(
               //     padding: const EdgeInsets.symmetric(vertical: 16.0),
