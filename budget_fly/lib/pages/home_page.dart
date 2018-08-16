@@ -31,7 +31,7 @@ class HomePageState extends State<HomePage> {
       case 1:
         return new AddBudgetItem();
       case 2:
-        return new ThirdFragment();
+        return new BudgetConfig();
 
       default:
         return new Text("Error");
@@ -74,7 +74,7 @@ _getDrawerItemWidget(int pos) {
       case 1:
         return new AddBudgetItem();
       case 2:
-        return new ThirdFragment();
+        return new BudgetConfig();
 
       default:
         return new Text("Error");
@@ -86,7 +86,7 @@ Drawer getDrawer(BuildContext context){
   final drawerItems = [
     new DrawerItem("Budget List", Icons.list),
     new DrawerItem("Add Budget Item", Icons.add),
-    new DrawerItem("Fragment 3", Icons.info)
+    new DrawerItem("Settings", Icons.settings)
   ];
   var drawerOptions = <Widget>[];
     for (var i = 0; i < drawerItems.length; i++) {
