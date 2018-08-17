@@ -10,6 +10,16 @@ class BudgetConfig extends StatefulWidget {
   }
 }
 
+/* Budget config page:
+- pay check
+- pay period/schedule
+   - x-weekly (starting on y day)
+   - on certain days off the month
+   - variable
+ - utility bill arrival dates
+   - as many as needed ( for checking the monthly bill amount)
+   */
+
 class BudgetConfigState extends State<BudgetConfig> {
   @override
   Widget build(BuildContext context) {
@@ -24,16 +34,15 @@ class BudgetConfigState extends State<BudgetConfig> {
           children: <Widget>[
             new Text("settings page"),
             new Padding(
-              padding: EdgeInsets.all(8.0),
-              child: new TextField(
-              decoration: InputDecoration(
-                
-                hintText: 'Enter your income per pay period'
+                padding: EdgeInsets.all(8.0),
+                child: new TextField(
+                  decoration: InputDecoration(
+                      hintText: 'Enter your income per pay period'),
+                )),
 
-                
-              ),
-            )
-            )
+            getCard(payCheckContent()),
+            getCard(new List<Widget>())
+            
             //payCheckCard(),
           ],
         ));
@@ -41,31 +50,50 @@ class BudgetConfigState extends State<BudgetConfig> {
 }
 
 getCard(List<Widget> content) {
-  return Card(
-      child: new Column(
-    mainAxisSize: MainAxisSize.min,
-    children: content,
-  ));
+  return Container(
+    height: 124.0,
+    margin: new EdgeInsets.all(8.0),
+      decoration: new BoxDecoration(
+       
+      shape: BoxShape.rectangle,
+      borderRadius: new BorderRadius.circular(8.0),
+      boxShadow: <BoxShadow>[
+        new BoxShadow(  
+          color: Colors.black12,
+          blurRadius: 10.0,
+          offset: new Offset(0.0, 10.0),
+        ),
+      ],
+    ),
+      child: Card(
+          child: new Column(
+            mainAxisSize: MainAxisSize.min,
+            children: content,
+  )));
 }
 
-payCheckCard() {
+payCheckContent() {
   List<Widget> content = new List<Widget>();
   content.add(new Text("Income"));
   content.add(new Text("35000"));
   content.add(new ButtonBar(
     children: <Widget>[
       new FlatButton(
-        child: const Text("Edit"),
-        onPressed: (){
-           //create dialog 
-        }
-      ),
+          child: const Text("Edit"),
+          onPressed: () {
+            //create dialog
+          }),
       new FlatButton(
         child: const Text("Schedule"),
-        onPressed: (){
-
-        },
-        ) 
+        onPressed: () {},
+      )
     ],
   ));
+  return content;
 }
+
+payPeriodContent(){
+
+}
+
+
