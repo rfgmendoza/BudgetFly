@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:sembast/sembast.dart';
 import 'package:budget_fly/pages/home_page.dart';
 import 'package:budget_fly/share/database_common.dart' show DBCommon, PayPeriodType;
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 class BudgetSettingsModel{
@@ -11,12 +11,16 @@ class BudgetSettingsModel{
   DateTime lastPayday;
   DateTime nextPayDay;
   List<int> calendarPayDays;
-}
 
-// Future<BudgetSettingsModel> getBudgetSettingsModel() async{
-//   DBCommon().openDBConnection();
-//   num _paycheck = await DBCommon.db.get();
-// }
+  BudgetSettingsModel(){
+    paycheck = null;
+    payPeriodType = null;
+    monthlyFrequency = null;
+    lastPayday = null;
+    nextPayDay = null;
+    calendarPayDays = null;
+  }
+}
 
 class BudgetConfig extends StatefulWidget {
   @override
@@ -36,12 +40,65 @@ class BudgetConfig extends StatefulWidget {
    */
 
 class BudgetConfigState extends State<BudgetConfig> {
-  // BudgetSettingsModel bsModel = 
-  // TextEditingController _c;
-  // @override
-  // initState(){
-  //   _c = new TextEditingController();
-  // }
+  BudgetSettingsModel bsModel = new BudgetSettingsModel();
+   TextEditingController _c;
+  @override
+  initState(){
+    super.initState();
+    _c = new TextEditingController();
+    _initBudgetSettings();
+  }
+
+  _initBudgetSettings() async {
+    BudgetSettingsModel bsm = new BudgetSettingsModel();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bsm.paycheck = prefs.getInt('paycheck') ?? null;
+    var type = prefs.getString('payperiodtype') ?? null;
+    
+    switch (type){
+      case "biweekly": bsm.payPeriodType = PayPeriodType.biweekly; break;
+      case "calendardate" : bsm.payPeriodType = PayPeriodType.calendarDate; break;
+      case "monthly" : bsm.payPeriodType = PayPeriodType.monthly; break;
+      default: bsm.payPeriodType = null; break;
+    }
+
+    bsm.monthlyFrequency = prefs.getInt("frequency") ?? null;
+    String lpd = prefs.getString("lastpayday")?? null;
+    if(lpd!=null)
+      bsm.lastPayday = DateTime.parse(lpd);
+    String npd = prefs.getString("lastpayday")??null;
+    if(npd!=null)      
+      bsm.nextPayDay = DateTime.parse(npd);
+    List<int> calendarPayDays = new List<int>();
+    List<String> calendarDates = prefs.getStringList("calendardates");
+    if(calendarDates!=null)
+      calendarDates.forEach((date)=> calendarPayDays.add(int.parse(date)));
+    bsm.calendarPayDays = calendarPayDays;
+    setState((){
+      bsModel = bsm;
+    });
+  }
+
+  _saveBudgetSettings(BudgetSettingsModel bsm) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setInt("paycheck", bsm.paycheck);
+    await prefs.setString("payperiodtype", bsm.payPeriodType.toString().split('.')[1]);
+    await prefs.setInt("frequency", bsm.monthlyFrequency);
+    await prefs.setString("lastpayday", bsm.lastPayday.toString());
+    await prefs.setString("nextpayday", bsm.lastPayday.toString());
+    List<String> calendarDates = new List<String>();
+    bsm.calendarPayDays.forEach((day)=> calendarDates.add(day.toString()));
+    await prefs.setStringList("calendardates", calendarDates);
+    setState(() {
+          bsm = bsm;
+        });
+  }
+
+  _saveInt(String key, int value) async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(key, value);
+  }
+
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -53,10 +110,46 @@ class BudgetConfigState extends State<BudgetConfig> {
         drawer: getDrawer(context),
         body: ListView(
           children: <Widget>[
+            //getPayCheck(context, bsModel),
+            ListTile(
+    
+      leading: new Icon(Icons.attach_money),
+      title: Text("Paycheck"),
+      subtitle: Text("\$"+ (bsModel.paycheck!=null ? bsModel.paycheck.toString(): "0")),
+      trailing: new Icon(Icons.edit),
+      onTap: () {
+        showDialog(
+            context: context,
+            child: new Dialog(
+                child: new Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: new TextField(
+              decoration:
+                  new InputDecoration(hintText: "Amount received per paycheck"),
+              keyboardType: TextInputType.numberWithOptions(),
+              controller: _c,
+            ),
+          ),
+          new FlatButton(
+            child: new Text("Save"),
+            onPressed: (){              
+              bsModel.paycheck = int.parse(_c.text);
+              setState(() {
+                bsModel = bsModel ;
+              });
+              _saveInt("paycheck", bsModel.paycheck);
+              Navigator.pop(context);
+              //_saveBudgetSettings(bsModel);            
+            },
+          )
+
+        ])));
+      }),
             Divider(),
-            getPayCheck(context),
-            getCard(payCheckContent()),
-            getCard(new List<Widget>())
+
 
             //payCheckCard(),
           ],
@@ -64,14 +157,21 @@ class BudgetConfigState extends State<BudgetConfig> {
   }
 }
 
-getPayCheck(BuildContext context) {
+getPayCheck(BuildContext context, BudgetSettingsModel bsModel) {
+  String paycheck;
+  if(bsModel.paycheck !=null)
+    paycheck = bsModel.paycheck.toString();
+  else
+  paycheck = "0";
   return ListTile(
+    
       leading: new Icon(Icons.attach_money),
       title: Text("Paycheck"),
-      subtitle: Text("\$1300"),
+      subtitle: Text("\$"+paycheck),
       trailing: new Icon(Icons.edit),
       onTap: () {
-        showDialog(context: context,
+        showDialog(
+            context: context,
             child: new Dialog(
                 child: new Column(children: <Widget>[
           new TextField(
@@ -82,9 +182,8 @@ getPayCheck(BuildContext context) {
           new FlatButton(
             child: new Text("Save"),
             onPressed: (){
-              // setState((){
-              //   this._paycheck = 
-              // });
+              
+            
             },
           )
 
