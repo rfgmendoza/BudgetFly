@@ -7,7 +7,7 @@ import 'package:path_provider/path_provider.dart';
 
 enum BudgetItemType { creditCard, bill, subscription }
 
-enum PayPeriodType { biweekly, monthly, calendarDate }
+enum PayPeriodType { weekly, monthly, calendarDate }
 
 class DBCommon {
   static Database db;
