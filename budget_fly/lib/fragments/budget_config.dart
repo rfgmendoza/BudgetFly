@@ -116,7 +116,7 @@ class BudgetConfigState extends State<BudgetConfig> {
   }
 
   _getPaySchedule() {
-    var _frequency = bsModel.monthlyFrequency; 
+    
     return ListTile(
         leading: new Icon(Icons.attach_money),
         title: Text("Pay Schedule"),
@@ -134,33 +134,59 @@ class BudgetConfigState extends State<BudgetConfig> {
                       padding: const EdgeInsets.all(8.0),
                       child: ChoiceChip(
                         selectedColor: Colors.green,
-                        label: //Text("option"),
-                            Row(
-                          mainAxisSize: MainAxisSize.max,
-                          //crossAxisAlignment: CrossAxisAlignment.stretch,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            Text("options1"),
-                            DropdownButton(
-                                value: bsModel.payPeriodType ==
-                                        PayPeriodType.weekly
-                                    ? _frequency
-                                    : null,
-                                items: _getWeeklyDropdown(),
-                                onChanged: (value) {
-                                  bsModel.monthlyFrequency = value;
-                                  DBCommon().saveBudgetSettings(bsModel);
-                                  setState(() {
-                                   _frequency = value;
-                                  });
-                                })
-                          ],
-                        ),
+                        label: Text("weekly"),
+                            
+                          
                         selected: bsModel.payPeriodType == PayPeriodType.weekly,
                         onSelected: (selected) {
-                          if (selected)
+                          if (selected){
                             bsModel.payPeriodType = PayPeriodType.weekly;
+                          setState(() {
+                                                          bsModel = bsModel;
+                                                        });
                           DBCommon().saveBudgetSettings(bsModel);
+                          Navigator.pop(context);
+                          }
+                        },
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: ChoiceChip(
+                        selectedColor: Colors.green,
+                        label: Text("monthly"),
+                            
+                          
+                        selected: bsModel.payPeriodType == PayPeriodType.monthly,
+                        onSelected: (selected) {
+                          if (selected){
+                            bsModel.payPeriodType = PayPeriodType.monthly;
+                          setState(() {
+                                                          bsModel = bsModel;
+                                                        });
+                          DBCommon().saveBudgetSettings(bsModel);
+                          Navigator.pop(context);
+                          }
+                        },
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: ChoiceChip(
+                        selectedColor: Colors.green,
+                        label: Text("calendar date"),
+                            
+                          
+                        selected: bsModel.payPeriodType == PayPeriodType.calendarDate,
+                        onSelected: (selected) {
+                          if (selected){
+                            bsModel.payPeriodType = PayPeriodType.calendarDate;
+                            setState(() {
+                                                          bsModel = bsModel;
+                                                        });
+                          DBCommon().saveBudgetSettings(bsModel);
+                          Navigator.pop(context);
+                          }
                         },
                       ),
                     ),
@@ -186,16 +212,8 @@ class BudgetConfigState extends State<BudgetConfig> {
                     //     selected: bsModel.payPeriodType == PayPeriodType.weekly,
                     //   ),
                     // ),
-                    FlatButton.icon(
-                      label: Text("save"),
-                      icon: Icon(Icons.check),
-                      onPressed: () {
-                        setState(() {
-                          bsModel = bsModel;
-                        });
-                        Navigator.pop(context);
-                      },
-                    )
+                    
+                    
                   ])));
         });
   }
