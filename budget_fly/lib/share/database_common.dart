@@ -12,6 +12,13 @@ enum PayPeriodType { weekly, monthly, calendarDate }
 class DBCommon {
   static Database db;
 
+  String paycheck = "paycheck";
+  String payPeriodType = "payperiodtype";
+  String frequency = "frequency";
+  String lastPayDay = "lastpayday";
+  String nextPayDay = "nextpayday";
+  String calendardates = "calendardates"; //comma seperated
+
   Future openDBConnection() async {
     if (db == null) {
       Directory appDocDir = await getApplicationDocumentsDirectory();
@@ -82,6 +89,57 @@ class DBCommon {
       
     }
     await DBCommon.db.deleteRecord(record);
+  }
+
+  Future<BudgetSettingsModel> getBudgetSettings() async{
+    await openDBConnection();
+    BudgetSettingsModel bsm = new BudgetSettingsModel();
+
+    bsm.paycheck = await db.get(paycheck) as num ?? 0;
+
+    String ppt = await db.get(payPeriodType);
+    switch(ppt !=null ? ppt.split('.')[1]: null ){
+      case "weekly": bsm.payPeriodType = PayPeriodType.weekly; break;
+      case "calendarDate": bsm.payPeriodType = PayPeriodType.calendarDate; break;
+      case "monthly" : bsm.payPeriodType = PayPeriodType.monthly; break;
+      default:bsm.payPeriodType=PayPeriodType.weekly;
+    }
+
+    
+    bsm.monthlyFrequency = await db.get(frequency) as num ?? 1;
+    // bsm.lastPayDay = await db.get(lastPayDay) as DateTime ?? DateTime.now();
+    // bsm.nextPayDay = await db.get(nextPayDay) as DateTime ?? DateTime.now();
+    bsm.calendarPayDays = await db.get(calendardates) as String ?? "1";
+    return bsm;
+  }
+
+  saveBudgetSettings(BudgetSettingsModel bsm ) async{
+    await db.put(bsm.paycheck, paycheck);
+    await db.put(bsm.payPeriodType.toString(), payPeriodType);
+    await db.put(bsm.monthlyFrequency, frequency);
+    await db.put(bsm.lastPayDay, lastPayDay);
+    await db.put(bsm.nextPayDay, nextPayDay);
+    await db.put(bsm.calendarPayDays, calendardates);
+    
+
+  }
+}
+
+class BudgetSettingsModel {
+  num paycheck;
+  PayPeriodType payPeriodType;
+  int monthlyFrequency;
+  DateTime lastPayDay;
+  DateTime nextPayDay;
+  String calendarPayDays;
+
+  BudgetSettingsModel() {
+    paycheck = null;
+    payPeriodType = null;
+    monthlyFrequency = null;
+    lastPayDay = null;
+    nextPayDay = null;
+    calendarPayDays = null;
   }
 }
 
