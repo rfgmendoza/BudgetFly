@@ -148,7 +148,7 @@ class BudgetConfigState extends State<BudgetConfig> {
             context: context,
             firstDate: DateTime.now().subtract(new Duration(days: 31)),
             lastDate: DateTime.now().add(new Duration(days: 31)),
-            initialDate: DateTime.now(),
+            initialDate: bsModel.lastPayDay!=null ? bsModel.lastPayDay :DateTime.now(),
             initialDatePickerMode: DatePickerMode.day,
             
           );
