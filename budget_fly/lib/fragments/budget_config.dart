@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:budget_fly/pages/home_page.dart';
 import 'package:budget_fly/share/database_common.dart'
@@ -22,18 +24,13 @@ class BudgetConfig extends StatefulWidget {
    */
 
 class BudgetConfigState extends State<BudgetConfig> {
-  BudgetSettingsModel bsModel;
+  BudgetSettingsModel bsModel = null;
   TextEditingController _c;
   @override
   initState() {
     _c = new TextEditingController();
 
     super.initState();
-  }
-
-  _saveInt(String key, int value) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(key, value);
   }
 
   @override
@@ -46,7 +43,7 @@ class BudgetConfigState extends State<BudgetConfig> {
       ),
       drawer: getDrawer(context),
       body: FutureBuilder(
-          future: DBCommon().getBudgetSettings(),
+          future: DBCommon().getBudgetSettings(bsModel),
           builder: (context, snapshot) {
             switch (snapshot.connectionState) {
               case ConnectionState.none:
@@ -66,6 +63,7 @@ class BudgetConfigState extends State<BudgetConfig> {
                       Divider(),
                       _getPaySchedule(),
                       Divider(),
+                      _getLastPayDay(),
 
                       //payCheckCard(),
                     ],
@@ -92,33 +90,82 @@ class BudgetConfigState extends State<BudgetConfig> {
                           mainAxisSize: MainAxisSize.min,
                           children: <Widget>[
                         Padding(
-                          padding: const EdgeInsets.all(16.0),
+                            padding: const EdgeInsets.only(top: 6.0),
+                            child: Text("Pay Check")),
+                        Padding(
+                          padding: const EdgeInsets.all(12.0),
                           child: new TextField(
+                            textAlign: TextAlign.center,
+                            onSubmitted: (text) {
+                              bsModel.paycheck = int.parse(text);
+                              _saveModel(bsModel);
+                            },
                             decoration: new InputDecoration(
                                 hintText: "Amount received per paycheck"),
-                            keyboardType: TextInputType.numberWithOptions(),
+                            keyboardType:
+                                TextInputType.numberWithOptions(decimal: true),
                             controller: _c,
                           ),
                         ),
-                        new FlatButton(
-                          child: new Text("Save"),
-                          onPressed: () {
-                            bsModel.paycheck = int.parse(_c.text);
-                            DBCommon().saveBudgetSettings(bsModel);
-                            setState(() {
-                              bsModel = bsModel;
-                            });
-                            Navigator.pop(context);
-                          },
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 6.0),
+                          child: new FlatButton(
+                            child: new Text("Save"),
+                            onPressed: () {
+                              bsModel.paycheck = int.parse(_c.text);
+                              _saveModel(bsModel);
+                            },
+                          ),
                         )
                       ])));
         });
   }
 
-  _getPaySchedule() {
-    
+  // _saveNextPayDay(){
+  //   DateTime npd = bsModel.lastPayDay.add(bsModel.payPeriodType == PayPeriodType.weekly ? Duration(days: 14): Duration(days:));
+  // }
+
+  _getLastPayDay() {
+    String lpd;
+    if(bsModel.lastPayDay !=null){
+      lpd = bsModel.lastPayDay.month.toString();
+      lpd += "\\"+bsModel.lastPayDay.day.toString();      
+    }
+    else
+      lpd = "not defined";
     return ListTile(
-        leading: new Icon(Icons.attach_money),
+        leading: new Icon(Icons.calendar_today),
+        title: Text("Last Pay Day"),
+        subtitle: Text(lpd),
+        trailing: new Icon(Icons.edit),
+        onTap: () {
+          _pickDateTime();
+        });
+  }
+
+  _pickDateTime() async {
+    final DateTime picked = await showDatePicker(
+            context: context,
+            firstDate: DateTime.now().subtract(new Duration(days: 31)),
+            lastDate: DateTime.now().add(new Duration(days: 31)),
+            initialDate: DateTime.now(),
+            initialDatePickerMode: DatePickerMode.day,
+            
+          );
+
+          if(picked !=null && picked != bsModel.lastPayDay){
+            bsModel.lastPayDay = picked;
+            DBCommon().saveBudgetSettings(bsModel);
+           
+            setState(() {
+              bsModel = bsModel;
+            });
+          }
+  }
+
+  _getPaySchedule() {
+    return ListTile(
+        leading: new Icon(Icons.av_timer),
         title: Text("Pay Schedule"),
         subtitle: Text(bsModel.payPeriodType != null
             ? bsModel.payPeriodType.toString().split(".")[1]
@@ -129,111 +176,51 @@ class BudgetConfigState extends State<BudgetConfig> {
               context: context,
               barrierDismissible: false,
               builder: (__) => new Dialog(
-                      child: Column(mainAxisSize: MainAxisSize.min, children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: ChoiceChip(
-                        selectedColor: Colors.green,
-                        label: Text("weekly"),
-                            
+                      child: Column(
+                         
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.stretch, 
                           
-                        selected: bsModel.payPeriodType == PayPeriodType.weekly,
-                        onSelected: (selected) {
-                          if (selected){
-                            bsModel.payPeriodType = PayPeriodType.weekly;
-                          setState(() {
-                                                          bsModel = bsModel;
-                                                        });
-                          DBCommon().saveBudgetSettings(bsModel);
-                          Navigator.pop(context);
-                          }
-                        },
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: ChoiceChip(
-                        selectedColor: Colors.green,
-                        label: Text("monthly"),
-                            
-                          
-                        selected: bsModel.payPeriodType == PayPeriodType.monthly,
-                        onSelected: (selected) {
-                          if (selected){
-                            bsModel.payPeriodType = PayPeriodType.monthly;
-                          setState(() {
-                                                          bsModel = bsModel;
-                                                        });
-                          DBCommon().saveBudgetSettings(bsModel);
-                          Navigator.pop(context);
-                          }
-                        },
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: ChoiceChip(
-                        selectedColor: Colors.green,
-                        label: Text("calendar date"),
-                            
-                          
-                        selected: bsModel.payPeriodType == PayPeriodType.calendarDate,
-                        onSelected: (selected) {
-                          if (selected){
-                            bsModel.payPeriodType = PayPeriodType.calendarDate;
-                            setState(() {
-                                                          bsModel = bsModel;
-                                                        });
-                          DBCommon().saveBudgetSettings(bsModel);
-                          Navigator.pop(context);
-                          }
-                        },
-                      ),
-                    ),
-                    // Padding(
-                    //   padding: const EdgeInsets.all(8.0),
-                    //   child: ChoiceChip(
-                    //     label: Row(
-                    //       children: <Widget>[
-                    //         Text("options2"),
-                    //       ],
-                    //     ),
-                    //     selected: bsModel.payPeriodType == PayPeriodType.weekly,
-                    //   ),
-                    // ),
-                    // Padding(
-                    //   padding: const EdgeInsets.all(8.0),
-                    //   child: ChoiceChip(
-                    //     label: Row(
-                    //       children: <Widget>[
-                    //         Text("options3"),
-                    //       ],
-                    //     ),
-                    //     selected: bsModel.payPeriodType == PayPeriodType.weekly,
-                    //   ),
-                    // ),
-                    
-                    
-                  ])));
+                          children: [
+                            _getChoiceChip(PayPeriodType.weekly),
+                            _getChoiceChip(PayPeriodType.monthly),
+                            //_getChoiceChip(PayPeriodType.calendarDate)
+                          ])));
         });
   }
 
-  _onPressSchedule(PayPeriodType type) {
-    bsModel.payPeriodType = type;
+  Color _getLabelStyle(PayPeriodType type) {
+    return bsModel.payPeriodType == type ? Colors.white : Colors.black;
+  }
+
+  _saveModel(BudgetSettingsModel bsModel) {
+    DBCommon().saveBudgetSettings(bsModel);
     setState(() {
       bsModel = bsModel;
     });
     Navigator.pop(context);
   }
 
-  List<DropdownMenuItem<int>> _getWeeklyDropdown() {
-    List<DropdownMenuItem<int>> list = new List<DropdownMenuItem<int>>();
-    for (int i = 1; i <= 4; i++) {
-      list.add(new DropdownMenuItem<int>(
-        value: i,
-        child: Text(i.toString()),
-      ));
-    }
-    return list;
+  _onPressSchedule(PayPeriodType type) {
+    bsModel.payPeriodType = type;
+    _saveModel(bsModel);
+  }
+
+  Widget _getChoiceChip(PayPeriodType type) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: ChoiceChip(
+        selectedColor: Colors.green,
+        label: Text(type.toString().split('.')[1]),
+        labelPadding: EdgeInsets.symmetric(horizontal: 30.0),
+        labelStyle: TextStyle(color: _getLabelStyle(type)),
+        selected: bsModel.payPeriodType == type,
+        onSelected: (selected) {
+          if (selected) {
+            _onPressSchedule(type);
+          }
+        },
+      ),
+    );
   }
 }

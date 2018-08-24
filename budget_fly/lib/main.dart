@@ -2,6 +2,7 @@
 import 'package:budget_fly/pages/home_page.dart';
 import 'package:budget_fly/fragments/budget_list.dart';
 import 'package:budget_fly/fragments/add_budget_item.dart';
+import 'package:budget_fly/fragments/budget_config.dart';
 import 'package:flutter/material.dart';
 
 void main() => runApp(new MyApp());
@@ -19,7 +20,7 @@ class MyApp extends StatelessWidget {
       routes: <String, WidgetBuilder> {
         '/list': (BuildContext context) => new BudgetList(),
         '/add': (BuildContext context) => new AddBudgetItem(),
-      
+        '/config': (BuildContext context) => new BudgetConfig(),
       }
     );
   }

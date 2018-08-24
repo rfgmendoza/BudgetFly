@@ -2,7 +2,7 @@ import 'package:sembast/sembast.dart';
 import 'package:sembast/sembast_io.dart';
 import 'package:path/path.dart';
 import 'dart:async';
-import 'dart:io' show Directory;
+import 'dart:io' show Directory, sleep;
 import 'package:path_provider/path_provider.dart';
 
 enum BudgetItemType { creditCard, bill, subscription }
@@ -91,7 +91,10 @@ class DBCommon {
     await DBCommon.db.deleteRecord(record);
   }
 
-  Future<BudgetSettingsModel> getBudgetSettings() async{
+  Future<BudgetSettingsModel> getBudgetSettings(bsModel) async{
+    if(bsModel !=null)
+      return bsModel;
+      
     await openDBConnection();
     BudgetSettingsModel bsm = new BudgetSettingsModel();
 
