@@ -193,7 +193,7 @@ class BudgetConfigState extends State<BudgetConfig> {
     else
       lpd = "not defined";
     return ListTile(
-        leading: new Icon(Icons.date_range),
+        //leading: new Icon(Icons.date_range),
         title: Text("Pay Day"),
         subtitle: Text("Last: "+ lpd + " Next: "+_setNextPayDay()),
         trailing: Column(children: [new Icon(Icons.calendar_today),new Text("Click to set last pay day")]),
