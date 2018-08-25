@@ -7,7 +7,7 @@ import 'package:path_provider/path_provider.dart';
 
 enum BudgetItemType { creditCard, bill, subscription }
 
-enum PayPeriodType { weekly, monthly, calendarDate }
+enum PayPeriodType { weekly, biweekly, monthly, firstAndFifteen }
 
 class DBCommon {
   static Database db;
@@ -17,7 +17,7 @@ class DBCommon {
   String frequency = "frequency";
   String lastPayDay = "lastpayday";
   String nextPayDay = "nextpayday";
-  String calendardates = "calendardates"; //comma seperated
+  
 
   Future openDBConnection() async {
     if (db == null) {
@@ -103,16 +103,19 @@ class DBCommon {
     String ppt = await db.get(payPeriodType);
     switch(ppt !=null ? ppt.split('.')[1]: null ){
       case "weekly": bsm.payPeriodType = PayPeriodType.weekly; break;
-      case "calendarDate": bsm.payPeriodType = PayPeriodType.calendarDate; break;
+      case "biweekly": bsm.payPeriodType = PayPeriodType.biweekly; break;
       case "monthly" : bsm.payPeriodType = PayPeriodType.monthly; break;
+      case "firstandfifteen" : bsm.payPeriodType = PayPeriodType.firstAndFifteen; break;
       default:bsm.payPeriodType=PayPeriodType.weekly;
     }
 
     
     bsm.monthlyFrequency = await db.get(frequency) as num ?? 1;
-    // bsm.lastPayDay = await db.get(lastPayDay) as DateTime ?? DateTime.now();
-    // bsm.nextPayDay = await db.get(nextPayDay) as DateTime ?? DateTime.now();
-    bsm.calendarPayDays = await db.get(calendardates) as String ?? "1";
+    var lpd = await db.get(lastPayDay);
+    bsm.lastPayDay = lpd != "null" && lpd != null ? DateTime.parse(lpd) : null;
+    var npd = await db.get(nextPayDay);
+    bsm.nextPayDay =  npd !="null" && npd!=null ? DateTime.parse(npd) : null;
+    
     return bsm;
   }
 
@@ -120,9 +123,9 @@ class DBCommon {
     await db.put(bsm.paycheck, paycheck);
     await db.put(bsm.payPeriodType.toString(), payPeriodType);
     await db.put(bsm.monthlyFrequency, frequency);
-    await db.put(bsm.lastPayDay, lastPayDay);
-    await db.put(bsm.nextPayDay, nextPayDay);
-    await db.put(bsm.calendarPayDays, calendardates);
+    await db.put(bsm.lastPayDay.toString(), lastPayDay);
+    await db.put(bsm.nextPayDay.toString(), nextPayDay);
+    
     
 
   }
@@ -134,7 +137,7 @@ class BudgetSettingsModel {
   int monthlyFrequency;
   DateTime lastPayDay;
   DateTime nextPayDay;
-  String calendarPayDays;
+  
 
   BudgetSettingsModel() {
     paycheck = null;
@@ -142,7 +145,7 @@ class BudgetSettingsModel {
     monthlyFrequency = null;
     lastPayDay = null;
     nextPayDay = null;
-    calendarPayDays = null;
+    
   }
 }
 
