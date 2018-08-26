@@ -2,6 +2,7 @@
 import '../fragments/budget_list.dart';
 import '../fragments/add_budget_item.dart';
 import 'package:budget_fly/fragments/budget_config.dart';
+import '../fragments/budget_summary.dart';
 
 import 'package:flutter/material.dart';
 
@@ -27,11 +28,14 @@ class HomePageState extends State<HomePage> {
   _getDrawerItemWidget(int pos, GlobalKey<ScaffoldState> key) {
     switch (pos) {
       case 0:
-        return new BudgetList(homepagekey: _homepagekey);
+        return new BudgetSummary();
       case 1:
+        return new BudgetList(homepagekey: _homepagekey);
+      case 2: 
         return new AddBudgetItem();
-      case 2:
+      case 3:
         return new BudgetConfig();
+      
 
       default:
         return new Text("Error");
@@ -70,10 +74,12 @@ class HomePageState extends State<HomePage> {
 _getDrawerItemWidget(int pos) {
     switch (pos) {
       case 0:
-        return new BudgetList();
+        return new BudgetSummary();
       case 1:
+        return new BudgetList();
+      case 2: 
         return new AddBudgetItem();
-      case 2:
+      case 3:
         return new BudgetConfig();
 
       default:
@@ -84,6 +90,7 @@ _getDrawerItemWidget(int pos) {
 Drawer getDrawer(BuildContext context){
 
   final drawerItems = [
+    new DrawerItem("Summary", Icons.dashboard),
     new DrawerItem("Budget List", Icons.list),
     new DrawerItem("Add Budget Item", Icons.add),
     new DrawerItem("Settings", Icons.settings)
