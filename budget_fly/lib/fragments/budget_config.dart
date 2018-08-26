@@ -121,105 +121,97 @@ class BudgetConfigState extends State<BudgetConfig> {
         });
   }
 
-  _setNextPayDay(){
-    if(bsModel.lastPayDay == null){
-      return null;
+  _setNextPayDay() {
+    if (bsModel.lastPayDay == null) {
+      return;
     }
     PayPeriodType type = bsModel.payPeriodType;
     DateTime lpd = bsModel.lastPayDay;
     DateTime npd = lpd;
     int day = lpd.day;
-    switch(bsModel.payPeriodType){
-             case PayPeriodType.monthly: 
-                  npd = lpd = new DateTime(lpd.year, lpd.month+1, lpd.day);
-                  break;        
+    switch (bsModel.payPeriodType) {
+      case PayPeriodType.monthly:
+        npd = lpd = new DateTime(lpd.year, lpd.month + 1, lpd.day);
+        break;
 
-             case PayPeriodType.biweekly: npd = lpd.add(Duration(days: 14)); break;
-             case PayPeriodType.weekly: npd = lpd.add(Duration(days:7)); break;
-             case PayPeriodType.firstAndFifteen: 
-                  if(day <= 15){
-                    npd = lpd.add(Duration(days: 15 - day));
-                    if(npd.weekday == DateTime.sunday)
-                      npd=npd.subtract(Duration(days: 2));
-                    else if(npd.weekday == DateTime.saturday){
-                      npd=npd.subtract(Duration(days:1));
-                    }
-                  }
-                  else if(day >15){
-                    npd = new DateTime(lpd.year, lpd.month+1, 1);
-                    if(npd.weekday == DateTime.sunday)
-                      npd=npd.subtract(Duration(days: 2));
-                    else if(npd.weekday == DateTime.saturday){
-                      npd=npd.subtract(Duration(days:1));
-                    }
-                  }
-                  break;
-             
-            
-           }
-      
+      case PayPeriodType.biweekly:
+        npd = lpd.add(Duration(days: 14));
+        break;
+      case PayPeriodType.weekly:
+        npd = lpd.add(Duration(days: 7));
+        break;
+      case PayPeriodType.firstAndFifteen:
+        if (day < 15) {
+          npd = lpd.add(Duration(days: 15 - day));
+          if (npd.weekday == DateTime.sunday)
+            npd = npd.subtract(Duration(days: 2));
+          else if (npd.weekday == DateTime.saturday) {
+            npd = npd.subtract(Duration(days: 1));
+          }
+        } else if (day >= 15) {
+          npd = new DateTime(lpd.year, lpd.month + 1, 1);
+          if (npd.weekday == DateTime.sunday)
+            npd = npd.subtract(Duration(days: 2));
+          else if (npd.weekday == DateTime.saturday) {
+            npd = npd.subtract(Duration(days: 1));
+          }
+        }
+        break;
+    }
+    if (bsModel.nextPayDay != npd) {
       bsModel.nextPayDay = npd;
       DBCommon().saveBudgetSettings(bsModel);
-      return npd.month.toString() + "\\" + npd.day.toString();
+    }
+    return;
   }
 
-  _getFrequency(){
-    String freqSubtitle = bsModel.monthlyFrequency != null ? bsModel.monthlyFrequency.toString() : "not defined";
-    if(bsModel.payPeriodType != null)
-    return ListTile(
-        leading: new Icon(Icons.date_range),
-        title: Text("Pay Period Frequency"),
-        subtitle: Text(freqSubtitle),
-        trailing: new Icon(Icons.edit),
-        onTap: () {
-           switch(bsModel.payPeriodType){
-             case PayPeriodType.monthly:
-             case PayPeriodType.biweekly:
-             case PayPeriodType.weekly:
-             case PayPeriodType.firstAndFifteen:
-             default:
-           }      
-        });
-  }
-
-
+  
 
   _getLastPayDay() {
     String lpd;
-    if(bsModel.lastPayDay !=null){
+    String npd;
+    if (bsModel.lastPayDay != null) {
       lpd = bsModel.lastPayDay.month.toString();
-      lpd += "\\"+bsModel.lastPayDay.day.toString();      
-    }
-    else
+      lpd += "\\" + bsModel.lastPayDay.day.toString();
+    } else
       lpd = "not defined";
+    if (bsModel.nextPayDay != null) {
+      npd = bsModel.nextPayDay.month.toString();
+      npd += "\\" + bsModel.nextPayDay.day.toString();
+    } else
+      npd = "not defined";
     return ListTile(
         //leading: new Icon(Icons.date_range),
         title: Text("Pay Day"),
-        subtitle: Text("Last: "+ lpd + " Next: "+_setNextPayDay()),
-        trailing: Column(children: [new Icon(Icons.calendar_today),new Text("Click to set last pay day")]),
+        subtitle: Text("Last: " + lpd + " Next: " + npd),
+        trailing: Column(children: [
+          new Icon(Icons.calendar_today),
+          new Text("Click to set last pay day")
+        ]),
         onTap: () {
           _pickDateTime();
         });
   }
 
   _pickDateTime() async {
+    DateTime now = DateTime.now();
     final DateTime picked = await showDatePicker(
-            context: context,
-            firstDate: DateTime.now().subtract(new Duration(days: 31)),
-            lastDate: DateTime.now().add(new Duration(days: 31)),
-            initialDate: bsModel.lastPayDay!=null ? bsModel.lastPayDay :DateTime.now(),
-            initialDatePickerMode: DatePickerMode.day,
-            
-          );
+      context: context,
+      firstDate: now.subtract(new Duration(days: 31)),
+      lastDate: now,
+      initialDate: bsModel.lastPayDay != null ? bsModel.lastPayDay : now,
+      initialDatePickerMode: DatePickerMode.day,
+    );
 
-          if(picked !=null && picked != bsModel.lastPayDay){
-            bsModel.lastPayDay = picked;
-            DBCommon().saveBudgetSettings(bsModel);
-           
-            setState(() {
-              bsModel = bsModel;
-            });
-          }
+    if (picked != null && picked != bsModel.lastPayDay) {
+      bsModel.lastPayDay = picked;
+
+      DBCommon().saveBudgetSettings(bsModel);
+      _setNextPayDay();
+      setState(() {
+        bsModel = bsModel;
+      });
+    }
   }
 
   _getPaySchedule() {
@@ -231,25 +223,20 @@ class BudgetConfigState extends State<BudgetConfig> {
             : "not defined"),
         trailing: new Icon(Icons.edit),
         onTap: () {
-          
           showDialog(
               context: context,
               barrierDismissible: false,
               builder: (__) => new Dialog(
                       child: Column(
-                         
                           mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.stretch, 
-                          
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            _getTypeChoice(PayPeriodType.weekly),
-                            _getTypeChoice(PayPeriodType.biweekly),
-                            _getTypeChoice(PayPeriodType.monthly),
-                            _getTypeChoice(PayPeriodType.firstAndFifteen),
-                            
-                          ])));
-        }
-        );
+                        _getTypeChoice(PayPeriodType.weekly),
+                        _getTypeChoice(PayPeriodType.biweekly),
+                        _getTypeChoice(PayPeriodType.monthly),
+                        _getTypeChoice(PayPeriodType.firstAndFifteen),
+                      ])));
+        });
   }
 
   Color _getLabelStyle(PayPeriodType type) {
@@ -267,6 +254,7 @@ class BudgetConfigState extends State<BudgetConfig> {
   _onPressSchedule(PayPeriodType type) {
     bsModel.payPeriodType = type;
     _saveModel(bsModel);
+    _setNextPayDay();
   }
 
   Widget _getTypeChoice(PayPeriodType type) {
