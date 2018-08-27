@@ -31,7 +31,7 @@ class BudgetSummary extends StatelessWidget {
     BudgetSettingsModel bsModel = await DBCommon().getBudgetSettings(null);
     
     if(bsModel.lastPayDay == null || bsModel.nextPayDay == null)
-      return null;
+      return "0 Pay days not set";
     
     Store store = await DBCommon().getStore("budget");
     List<Record> recordList = await store.records.toList();
@@ -76,11 +76,31 @@ class BudgetSummary extends StatelessWidget {
     ]));
   }
 
+  Future<String> _getTotalDue() async {
+    await DBCommon().openDBConnection();
+    BudgetSettingsModel bsModel = await DBCommon().getBudgetSettings(null);
+    
+    if(bsModel.lastPayDay == null || bsModel.nextPayDay == null)
+      return "0 Pay days not set";
+    
+    Store store = await DBCommon().getStore("budget");
+    List<Record> recordList = await store.records.toList();
+    num totalDue = 0;
+    recordList.forEach((record){
+      int dayDue = int.parse(record.value[0]["dayDue"]);
+
+      if(dayDue > bsModel.lastPayDay.day && dayDue <= bsModel.nextPayDay.day){
+        totalDue += int.parse(record.value[0]["amount"]);
+      }
+    });
+    return totalDue.toString();
+  }
+
   _totalDueCard() {
     return Card(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
       FutureBuilder(
-        future: _getPerDiem(),
+        future: _getTotalDue(),
         builder: (context, snapshot) {
           switch (snapshot.connectionState){
             case ConnectionState.none:
@@ -90,8 +110,8 @@ class BudgetSummary extends StatelessWidget {
               if(snapshot.hasData) {
                 if(snapshot.data !=null){
                   return ListTile(
-                    title: Text("Total due for bills this PayPeriod"),
-                    subtitle: Text("not implemented"),
+                    title: Text("Total Due For Bills"),
+                    subtitle: Text("\$${snapshot.data}"),
                   );
 
                 }
@@ -102,13 +122,33 @@ class BudgetSummary extends StatelessWidget {
         }
       )
     ]));
+  }
+
+  Future<String> _getPaidSoFar() async {
+    await DBCommon().openDBConnection();
+    BudgetSettingsModel bsModel = await DBCommon().getBudgetSettings(null);
+    
+    if(bsModel.lastPayDay == null || bsModel.nextPayDay == null)
+      return "0 Pay days not set";
+    
+    Store store = await DBCommon().getStore("budget");
+    List<Record> recordList = await store.records.toList();
+    num totalDue = 0;
+    recordList.forEach((record){
+      int dayDue = int.parse(record.value[0]["dayDue"]);
+
+      if(dayDue > bsModel.lastPayDay.day && dayDue <= bsModel.nextPayDay.day && dayDue <= DateTime.now().day){
+        totalDue += int.parse(record.value[0]["amount"]);
+      }
+    });
+    return totalDue.toString();
   }
 
   _paidSoFarCard() {
     return Card(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
       FutureBuilder(
-        future: _getPerDiem(),
+        future: _getPaidSoFar(),
         builder: (context, snapshot) {
           switch (snapshot.connectionState){
             case ConnectionState.none:
@@ -118,8 +158,8 @@ class BudgetSummary extends StatelessWidget {
               if(snapshot.hasData) {
                 if(snapshot.data !=null){
                   return ListTile(
-                    title: Text("Daily Free Budget"),
-                    subtitle: Text("not implemented"),
+                    title: Text("Amount Paid So Far"),
+                    subtitle: Text("\$${snapshot.data}"),
                   );
 
                 }
@@ -132,11 +172,32 @@ class BudgetSummary extends StatelessWidget {
     ]));
   }
 
+  Future<String> _getAmountAvailable() async {
+    await DBCommon().openDBConnection();
+    BudgetSettingsModel bsModel = await DBCommon().getBudgetSettings(null);
+    
+    if(bsModel.lastPayDay == null || bsModel.nextPayDay == null)
+      return "0 Pay days not set";
+    
+    Store store = await DBCommon().getStore("budget");
+    List<Record> recordList = await store.records.toList();
+    num totalDue = 0;
+    recordList.forEach((record){
+      int dayDue = int.parse(record.value[0]["dayDue"]);
+
+      if(dayDue > bsModel.lastPayDay.day && dayDue <= bsModel.nextPayDay.day){
+        totalDue += int.parse(record.value[0]["amount"]);
+      }
+    });
+    num netBudget = bsModel.paycheck - totalDue;
+    return netBudget.toString();
+  }
+
   _amountAvailableCard() {
     return Card(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
       FutureBuilder(
-        future: _getPerDiem(),
+        future: _getAmountAvailable(),
         builder: (context, snapshot) {
           switch (snapshot.connectionState){
             case ConnectionState.none:
@@ -146,8 +207,8 @@ class BudgetSummary extends StatelessWidget {
               if(snapshot.hasData) {
                 if(snapshot.data !=null){
                   return ListTile(
-                    title: Text("Daily Free Budget"),
-                    subtitle: Text("not implemented"),
+                    title: Text("Total Amount Available"),
+                    subtitle: Text("\$${snapshot.data}"),
                   );
 
                 }
