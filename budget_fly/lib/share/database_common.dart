@@ -17,7 +17,6 @@ class DBCommon {
   String frequency = "frequency";
   String lastPayDay = "lastpayday";
   String nextPayDay = "nextpayday";
-  
 
   Future openDBConnection() async {
     if (db == null) {
@@ -83,51 +82,121 @@ class DBCommon {
     return budgetItemRecord;
   }
 
-  deleteBudgetItem(Record record) async{
-    if(db == null){
+  deleteBudgetItem(Record record) async {
+    if (db == null) {
       openDBConnection();
-      
     }
     await DBCommon.db.deleteRecord(record);
   }
 
-  Future<BudgetSettingsModel> getBudgetSettings(bsModel) async{
-    if(bsModel !=null)
-      return bsModel;
-      
+  Future<BudgetSettingsModel> getBudgetSettings(bsModel) async {
+    if (bsModel != null) return bsModel;
+
     await openDBConnection();
     BudgetSettingsModel bsm = new BudgetSettingsModel();
 
     bsm.paycheck = await db.get(paycheck) as num ?? 0;
 
     String ppt = await db.get(payPeriodType);
-    switch(ppt !=null ? ppt.split('.')[1]: null ){
-      case "weekly": bsm.payPeriodType = PayPeriodType.weekly; break;
-      case "biweekly": bsm.payPeriodType = PayPeriodType.biweekly; break;
-      case "monthly" : bsm.payPeriodType = PayPeriodType.monthly; break;
-      case "firstandfifteen" : bsm.payPeriodType = PayPeriodType.firstAndFifteen; break;
-      default:bsm.payPeriodType=PayPeriodType.weekly;
+    switch (ppt != null ? ppt.split('.')[1] : null) {
+      case "weekly":
+        bsm.payPeriodType = PayPeriodType.weekly;
+        break;
+      case "biweekly":
+        bsm.payPeriodType = PayPeriodType.biweekly;
+        break;
+      case "monthly":
+        bsm.payPeriodType = PayPeriodType.monthly;
+        break;
+      case "firstandfifteen":
+        bsm.payPeriodType = PayPeriodType.firstAndFifteen;
+        break;
+      default:
+        bsm.payPeriodType = PayPeriodType.weekly;
     }
 
-    
     bsm.monthlyFrequency = await db.get(frequency) as num ?? 1;
     var lpd = await db.get(lastPayDay);
     bsm.lastPayDay = lpd != "null" && lpd != null ? DateTime.parse(lpd) : null;
     var npd = await db.get(nextPayDay);
-    bsm.nextPayDay =  npd !="null" && npd!=null ? DateTime.parse(npd) : null;
-    
+    bsm.nextPayDay = npd != "null" && npd != null ? DateTime.parse(npd) : null;
+
+    bsm = updatePayDays(bsm);
+
     return bsm;
   }
 
-  saveBudgetSettings(BudgetSettingsModel bsm ) async{
+  BudgetSettingsModel updatePayDays(BudgetSettingsModel bsm) {
+    bool payDaysUpdated = false;
+    while (!payDaysUpdated) {
+      Duration npdDiff = bsm.nextPayDay.difference(DateTime.now());
+      
+      if (npdDiff.isNegative) {
+        //negative means nextPayDay is the past and needs updating
+        bsm.lastPayDay = bsm.nextPayDay;
+        bsm = setNextPayDay(bsm);
+        
+      }
+      npdDiff = bsm.nextPayDay.difference(DateTime.now());
+      Duration lpdDiff = bsm. lastPayDay.difference(DateTime.now());
+      if(lpdDiff.isNegative && !npdDiff.isNegative){
+        payDaysUpdated = true;
+      }      
+    }
+    saveBudgetSettings(bsm);
+    return bsm;
+  }
+
+  BudgetSettingsModel setNextPayDay(BudgetSettingsModel bsModel) {
+    if (bsModel.lastPayDay == null) {
+      return bsModel;
+    }
+    PayPeriodType type = bsModel.payPeriodType;
+    DateTime lpd = bsModel.lastPayDay;
+    DateTime npd = lpd;
+    int day = lpd.day;
+    switch (bsModel.payPeriodType) {
+      case PayPeriodType.monthly:
+        npd = lpd = new DateTime(lpd.year, lpd.month + 1, lpd.day);
+        break;
+
+      case PayPeriodType.biweekly:
+        npd = lpd.add(Duration(days: 14));
+        break;
+      case PayPeriodType.weekly:
+        npd = lpd.add(Duration(days: 7));
+        break;
+      case PayPeriodType.firstAndFifteen:
+        if (day < 15) {
+          npd = lpd.add(Duration(days: 15 - day));
+          if (npd.weekday == DateTime.sunday)
+            npd = npd.subtract(Duration(days: 2));
+          else if (npd.weekday == DateTime.saturday) {
+            npd = npd.subtract(Duration(days: 1));
+          }
+        } else if (day >= 15) {
+          npd = new DateTime(lpd.year, lpd.month + 1, 1);
+          if (npd.weekday == DateTime.sunday)
+            npd = npd.subtract(Duration(days: 2));
+          else if (npd.weekday == DateTime.saturday) {
+            npd = npd.subtract(Duration(days: 1));
+          }
+        }
+        break;
+    }
+    if (bsModel.nextPayDay != npd) 
+      bsModel.nextPayDay = npd;
+
+    return bsModel;
+    
+  }
+
+  saveBudgetSettings(BudgetSettingsModel bsm) async {
     await db.put(bsm.paycheck, paycheck);
     await db.put(bsm.payPeriodType.toString(), payPeriodType);
     await db.put(bsm.monthlyFrequency, frequency);
     await db.put(bsm.lastPayDay.toString(), lastPayDay);
     await db.put(bsm.nextPayDay.toString(), nextPayDay);
-    
-    
-
   }
 }
 
@@ -137,7 +206,6 @@ class BudgetSettingsModel {
   int monthlyFrequency;
   DateTime lastPayDay;
   DateTime nextPayDay;
-  
 
   BudgetSettingsModel() {
     paycheck = null;
@@ -145,7 +213,6 @@ class BudgetSettingsModel {
     monthlyFrequency = null;
     lastPayDay = null;
     nextPayDay = null;
-    
   }
 }
 

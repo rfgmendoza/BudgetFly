@@ -1,10 +1,8 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:budget_fly/pages/home_page.dart';
 import 'package:budget_fly/share/database_common.dart'
     show DBCommon, PayPeriodType, BudgetSettingsModel;
-import 'package:shared_preferences/shared_preferences.dart';
+
 
 class BudgetConfig extends StatefulWidget {
   @override
@@ -121,49 +119,7 @@ class BudgetConfigState extends State<BudgetConfig> {
         });
   }
 
-  _setNextPayDay() {
-    if (bsModel.lastPayDay == null) {
-      return;
-    }
-    PayPeriodType type = bsModel.payPeriodType;
-    DateTime lpd = bsModel.lastPayDay;
-    DateTime npd = lpd;
-    int day = lpd.day;
-    switch (bsModel.payPeriodType) {
-      case PayPeriodType.monthly:
-        npd = lpd = new DateTime(lpd.year, lpd.month + 1, lpd.day);
-        break;
-
-      case PayPeriodType.biweekly:
-        npd = lpd.add(Duration(days: 14));
-        break;
-      case PayPeriodType.weekly:
-        npd = lpd.add(Duration(days: 7));
-        break;
-      case PayPeriodType.firstAndFifteen:
-        if (day < 15) {
-          npd = lpd.add(Duration(days: 15 - day));
-          if (npd.weekday == DateTime.sunday)
-            npd = npd.subtract(Duration(days: 2));
-          else if (npd.weekday == DateTime.saturday) {
-            npd = npd.subtract(Duration(days: 1));
-          }
-        } else if (day >= 15) {
-          npd = new DateTime(lpd.year, lpd.month + 1, 1);
-          if (npd.weekday == DateTime.sunday)
-            npd = npd.subtract(Duration(days: 2));
-          else if (npd.weekday == DateTime.saturday) {
-            npd = npd.subtract(Duration(days: 1));
-          }
-        }
-        break;
-    }
-    if (bsModel.nextPayDay != npd) {
-      bsModel.nextPayDay = npd;
-      DBCommon().saveBudgetSettings(bsModel);
-    }
-    return;
-  }
+  
 
   
 
@@ -194,10 +150,18 @@ class BudgetConfigState extends State<BudgetConfig> {
   }
 
   _pickDateTime() async {
+    int daysBack = 31;
+    if(bsModel.payPeriodType == PayPeriodType.weekly){
+      daysBack = 7;
+    }
+    else if(bsModel.payPeriodType == PayPeriodType.biweekly){
+      daysBack = 14;
+    }
+    
     DateTime now = DateTime.now();
     final DateTime picked = await showDatePicker(
       context: context,
-      firstDate: now.subtract(new Duration(days: 31)),
+      firstDate: now.subtract(new Duration(days: daysBack)),
       lastDate: now,
       initialDate: bsModel.lastPayDay != null ? bsModel.lastPayDay : now,
       initialDatePickerMode: DatePickerMode.day,
@@ -205,9 +169,10 @@ class BudgetConfigState extends State<BudgetConfig> {
 
     if (picked != null && picked != bsModel.lastPayDay) {
       bsModel.lastPayDay = picked;
-
+      bsModel = DBCommon().setNextPayDay(bsModel);
+      bsModel = DBCommon().updatePayDays(bsModel);
       DBCommon().saveBudgetSettings(bsModel);
-      _setNextPayDay();
+      
       setState(() {
         bsModel = bsModel;
       });
@@ -226,16 +191,21 @@ class BudgetConfigState extends State<BudgetConfig> {
           showDialog(
               context: context,
               barrierDismissible: false,
-              builder: (__) => new Dialog(
-                      child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                        _getTypeChoice(PayPeriodType.weekly),
-                        _getTypeChoice(PayPeriodType.biweekly),
-                        _getTypeChoice(PayPeriodType.monthly),
-                        _getTypeChoice(PayPeriodType.firstAndFifteen),
-                      ])));
+              builder: (__) => Container(
+                            padding: EdgeInsets.symmetric(horizontal: 80.0),
+                            
+                              child: new Dialog(
+                        child: Column(
+                          
+                            mainAxisSize: MainAxisSize.min,
+                            //crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                          _getTypeChoice(PayPeriodType.weekly),
+                          _getTypeChoice(PayPeriodType.biweekly),
+                          _getTypeChoice(PayPeriodType.monthly),
+                          _getTypeChoice(PayPeriodType.firstAndFifteen),
+                        ])),
+              ));
         });
   }
 
@@ -253,18 +223,26 @@ class BudgetConfigState extends State<BudgetConfig> {
 
   _onPressSchedule(PayPeriodType type) {
     bsModel.payPeriodType = type;
+    bsModel = DBCommon().setNextPayDay(bsModel);
+    bsModel = DBCommon().updatePayDays(bsModel);
     _saveModel(bsModel);
-    _setNextPayDay();
+    
   }
 
   Widget _getTypeChoice(PayPeriodType type) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(1.0),
       child: ChoiceChip(
-        selectedColor: Colors.green,
-        label: Text(type.toString().split('.')[1]),
-        labelPadding: EdgeInsets.symmetric(horizontal: 30.0),
-        labelStyle: TextStyle(color: _getLabelStyle(type)),
+        shape: new BeveledRectangleBorder(borderRadius: BorderRadius.all(new Radius.circular(3.0))),
+        padding: EdgeInsets.symmetric(vertical: 15.0),
+        selectedColor: Colors.blue,
+        label: Center(
+          child: Text(type == PayPeriodType.firstAndFifteen 
+            ? "1st & 15th" 
+            : type.toString().split('.')[1][0].toUpperCase() + type.toString().split('.')[1].substring(1)
+          )
+        ),
+        labelStyle: TextStyle(color: _getLabelStyle(type), fontWeight: FontWeight.bold),
         selected: bsModel.payPeriodType == type,
         onSelected: (selected) {
           if (selected) {
