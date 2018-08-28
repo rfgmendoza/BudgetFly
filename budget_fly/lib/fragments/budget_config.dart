@@ -62,7 +62,7 @@ class BudgetConfigState extends State<BudgetConfig> {
                       _getPaySchedule(),
                       // Divider(),
                       _getLastPayDay(),
-
+                      Divider()
                       //payCheckCard(),
                     ],
                   );
