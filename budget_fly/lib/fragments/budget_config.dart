@@ -3,7 +3,6 @@ import 'package:budget_fly/pages/home_page.dart';
 import 'package:budget_fly/share/database_common.dart'
     show DBCommon, PayPeriodType, BudgetSettingsModel;
 
-
 class BudgetConfig extends StatefulWidget {
   @override
   BudgetConfigState createState() {
@@ -119,27 +118,36 @@ class BudgetConfigState extends State<BudgetConfig> {
         });
   }
 
-  
-
-  
-
   _getLastPayDay() {
     String lpd;
     String npd;
+    TextStyle textStyle;
     if (bsModel.lastPayDay != null) {
       lpd = bsModel.lastPayDay.month.toString();
       lpd += "\\" + bsModel.lastPayDay.day.toString();
-    } else
+      textStyle = TextStyle(color:Colors.black);
+    } else{
+      textStyle = TextStyle(color:Colors.red);
       lpd = "not defined";
+    }
     if (bsModel.nextPayDay != null) {
       npd = bsModel.nextPayDay.month.toString();
       npd += "\\" + bsModel.nextPayDay.day.toString();
-    } else
+      textStyle = TextStyle(color:Colors.black);
+    } else{
+      textStyle = TextStyle(color:Colors.red);
       npd = "not defined";
+    }
     return ListTile(
         //leading: new Icon(Icons.date_range),
         title: Text("Pay Day"),
-        subtitle: Text("Last: " + lpd + " Next: " + npd),
+        subtitle: Text.rich(
+          TextSpan(children: [
+            TextSpan(text:  "Last: "),
+            TextSpan(text:  lpd, style: textStyle),
+            TextSpan(text:  " Next: "),
+            TextSpan(text:  npd, style: textStyle),
+            ])),
         trailing: Column(children: [
           new Icon(Icons.calendar_today),
           new Text("Click to set last pay day")
@@ -151,13 +159,12 @@ class BudgetConfigState extends State<BudgetConfig> {
 
   _pickDateTime() async {
     int daysBack = 31;
-    if(bsModel.payPeriodType == PayPeriodType.weekly){
+    if (bsModel.payPeriodType == PayPeriodType.weekly) {
       daysBack = 7;
-    }
-    else if(bsModel.payPeriodType == PayPeriodType.biweekly){
+    } else if (bsModel.payPeriodType == PayPeriodType.biweekly) {
       daysBack = 14;
     }
-    
+
     DateTime now = DateTime.now();
     final DateTime picked = await showDatePicker(
       context: context,
@@ -172,7 +179,7 @@ class BudgetConfigState extends State<BudgetConfig> {
       bsModel = DBCommon().setNextPayDay(bsModel);
       bsModel = DBCommon().updatePayDays(bsModel);
       DBCommon().saveBudgetSettings(bsModel);
-      
+
       setState(() {
         bsModel = bsModel;
       });
@@ -192,12 +199,9 @@ class BudgetConfigState extends State<BudgetConfig> {
               context: context,
               barrierDismissible: false,
               builder: (__) => Container(
-                            padding: EdgeInsets.symmetric(horizontal: 80.0),
-                            
-                              child: new Dialog(
-                        child: Column(
-                          
-                            mainAxisSize: MainAxisSize.min,
+                    padding: EdgeInsets.symmetric(horizontal: 80.0),
+                    child: new Dialog(
+                        child: Column(mainAxisSize: MainAxisSize.min,
                             //crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                           _getTypeChoice(PayPeriodType.weekly),
@@ -205,7 +209,7 @@ class BudgetConfigState extends State<BudgetConfig> {
                           _getTypeChoice(PayPeriodType.monthly),
                           _getTypeChoice(PayPeriodType.firstAndFifteen),
                         ])),
-              ));
+                  ));
         });
   }
 
@@ -226,23 +230,23 @@ class BudgetConfigState extends State<BudgetConfig> {
     bsModel = DBCommon().setNextPayDay(bsModel);
     bsModel = DBCommon().updatePayDays(bsModel);
     _saveModel(bsModel);
-    
   }
 
   Widget _getTypeChoice(PayPeriodType type) {
     return Padding(
       padding: const EdgeInsets.all(1.0),
       child: ChoiceChip(
-        shape: new BeveledRectangleBorder(borderRadius: BorderRadius.all(new Radius.circular(3.0))),
+        shape: new BeveledRectangleBorder(
+            borderRadius: BorderRadius.all(new Radius.circular(3.0))),
         padding: EdgeInsets.symmetric(vertical: 15.0),
         selectedColor: Colors.blue,
         label: Center(
-          child: Text(type == PayPeriodType.firstAndFifteen 
-            ? "1st & 15th" 
-            : type.toString().split('.')[1][0].toUpperCase() + type.toString().split('.')[1].substring(1)
-          )
-        ),
-        labelStyle: TextStyle(color: _getLabelStyle(type), fontWeight: FontWeight.bold),
+            child: Text(type == PayPeriodType.firstAndFifteen
+                ? "1st & 15th"
+                : type.toString().split('.')[1][0].toUpperCase() +
+                    type.toString().split('.')[1].substring(1))),
+        labelStyle:
+            TextStyle(color: _getLabelStyle(type), fontWeight: FontWeight.bold),
         selected: bsModel.payPeriodType == type,
         onSelected: (selected) {
           if (selected) {

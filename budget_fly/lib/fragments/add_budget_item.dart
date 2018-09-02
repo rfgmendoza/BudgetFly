@@ -16,9 +16,24 @@ class AddBudgetItem extends StatefulWidget {
 
 class AddBudgetItemState extends State<AddBudgetItem> {
   final _formKey = GlobalKey<FormState>();
-
+  DateTime _selectedDate;
   BudgetItem _budgetItem = BudgetItem();
   bool editMode = false;
+
+  void _showDatePicker() async {
+    DateTime now = DateTime.now();
+    final DateTime selectedDate = await showDatePicker(
+        context: context,
+        initialDate: _selectedDate != null ? _selectedDate : now,
+        firstDate: now,
+        lastDate: now.add(Duration(days: 31))
+    );
+
+    setState(() {
+          _selectedDate = selectedDate;
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
     if (widget.budgetItem != null) {
@@ -29,12 +44,15 @@ class AddBudgetItemState extends State<AddBudgetItem> {
         appBar: new AppBar(
           // here we display the title corresponding to the fragment
           // you can instead choose to have a static title
-          title: editMode ? new Text("Edit Budget Item") : new Text("Add Budget Item"),
+          title: editMode
+              ? new Text("Edit Budget Item")
+              : new Text("Add Budget Item"),
         ),
-        drawer: editMode? null : getDrawer(context),
+        drawer: editMode ? null : getDrawer(context),
         body: Form(
             key: _formKey,
-            child: SingleChildScrollView(child: Column(children: <Widget>[
+            child: SingleChildScrollView(
+                child: Column(children: <Widget>[
               Padding(
                   padding: EdgeInsets.all(8.0),
                   child: TextFormField(
@@ -69,25 +87,17 @@ class AddBudgetItemState extends State<AddBudgetItem> {
                       })),
               Padding(
                   padding: EdgeInsets.all(8.0),
-                  child: TextFormField(
-                      decoration: InputDecoration(
-                          hintText: "Day Due", labelText: "Day Due"),
-                      initialValue: _budgetItem.dayDue?.toString(),
-                      keyboardType: TextInputType.datetime,
-                      onSaved: (String value) {
-                        this._budgetItem.dayDue = int.parse(value);
-                      },
-                      validator: (value) {
-                        if (value.isEmpty ||
-                            int.parse(value) <= 0 ||
-                            int.parse(value) > 31) {
-                          return 'Please enter a valid day of the month:' +
-                              (value.isEmpty ||
-                                      int.parse(value) > 0 ||
-                                      int.parse(value) <= 31)
-                                  .toString();
-                        }
-                      })),
+                  child: RaisedButton(
+                    onPressed: () => _showDatePicker(),
+                    child: ListTile(
+                      title: Text("Date Due"),
+                      subtitle: _selectedDate != null 
+                        ? Text(_selectedDate.month.toString() +" \\ " +_selectedDate.day.toString())
+                        : Text("Not set yet!"),
+                      trailing: Icon(Icons.mode_edit)
+                    )
+                  )
+                  ),
               RadioListTile<BudgetItemType>(
                 title: const Text('Credit Card'),
                 value: BudgetItemType.creditCard,
@@ -133,7 +143,7 @@ class AddBudgetItemState extends State<AddBudgetItem> {
                         addtoLocalStore(context);
                       }
                     },
-                    child: !editMode ? Text('Add'):Text('Save'),
+                    child: !editMode ? Text('Add') : Text('Save'),
                   )),
               // Padding(
               //     padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -143,19 +153,15 @@ class AddBudgetItemState extends State<AddBudgetItem> {
               //       },
               //       child: Text('check'),
               //     ))
-            ]
-            )
-            )
-            ));
+            ]))));
   }
 
   void addtoLocalStore(BuildContext context) async {
-    
     Store budgetStore = await DBCommon().getStore("budget");
-      Record budgetItem = DBCommon().maptoRecord(budgetStore, _budgetItem);
-    if(budgetItem.key != null){    
+    _budgetItem.dayDue = _selectedDate.day;
+    Record budgetItem = DBCommon().maptoRecord(budgetStore, _budgetItem);
+    if (budgetItem.key != null) {
       await DBCommon().deleteBudgetItem(budgetItem);
-           
     }
     DBCommon.db.putRecord(budgetItem);
 

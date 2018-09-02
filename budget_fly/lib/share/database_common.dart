@@ -41,8 +41,8 @@ class DBCommon {
     BudgetItem _budgetItem = BudgetItem();
     Map recordValue = record.value[0];
     _budgetItem.name = recordValue["name"].trim();
-    _budgetItem.amount = int.parse(recordValue["amount"]);
-
+    _budgetItem.amount = num.parse(recordValue["amount"]);
+  
     _budgetItem.dayDue = int.parse(recordValue["dayDue"]);
 
     if (recordValue["itemType"].toString().contains("credit")) {
@@ -129,7 +129,8 @@ class DBCommon {
   BudgetSettingsModel updatePayDays(BudgetSettingsModel bsm) {
     bool payDaysUpdated = false;
     while (!payDaysUpdated) {
-      Duration npdDiff = bsm.nextPayDay.difference(DateTime.now());
+      if(bsm.nextPayDay !=null){
+        Duration npdDiff = bsm.nextPayDay.difference(DateTime.now());
       
       if (npdDiff.isNegative) {
         //negative means nextPayDay is the past and needs updating
@@ -141,7 +142,10 @@ class DBCommon {
       Duration lpdDiff = bsm. lastPayDay.difference(DateTime.now());
       if(lpdDiff.isNegative && !npdDiff.isNegative){
         payDaysUpdated = true;
-      }      
+      }
+      }
+      else
+        payDaysUpdated = true;      
     }
     saveBudgetSettings(bsm);
     return bsm;
@@ -219,7 +223,7 @@ class BudgetSettingsModel {
 class BudgetItem {
   String name;
   num amount;
-  num dayDue;
+  int dayDue;
   BudgetItemType itemType;
   Record record;
 

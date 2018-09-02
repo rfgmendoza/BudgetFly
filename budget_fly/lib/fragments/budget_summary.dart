@@ -37,9 +37,9 @@ class BudgetSummary extends StatelessWidget {
     List<Record> recordList = await store.records.toList();
     num totalDue = 0;
     recordList.forEach((record){
-      int dayDue = int.parse(record.value[0]["dayDue"]);
+      DateTime dayDue = DateTime.parse(record.value[0]["dayDue"]);
 
-      if(dayDue > bsModel.lastPayDay.day && dayDue <= bsModel.nextPayDay.day){
+      if(dayDue.day > bsModel.lastPayDay.day && dayDue.day <= bsModel.nextPayDay.day){
         totalDue += int.parse(record.value[0]["amount"]);
       }
     });
