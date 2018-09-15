@@ -78,7 +78,7 @@ class AddBudgetItemState extends State<AddBudgetItem> {
                       keyboardType: TextInputType.numberWithOptions(
                           signed: false, decimal: true),
                       onSaved: (String value) {
-                        this._budgetItem.amount = int.parse(value);
+                        this._budgetItem.amount = num.parse(value);
                       },
                       validator: (value) {
                         if (value.isEmpty) {

@@ -41,7 +41,7 @@ class BudgetSummary extends StatelessWidget {
       dayDue = DBCommon().setDateToNextMonth(dayDue);
 
       if(dayDue.day > bsModel.lastPayDay.day && dayDue.day <= bsModel.nextPayDay.day){
-        totalDue += int.parse(record.value[0]["amount"]);
+        totalDue += num.parse(record.value[0]["amount"]);
       }
     });
     num totalDays = (bsModel.nextPayDay.difference(bsModel.lastPayDay).inDays);
@@ -92,10 +92,10 @@ class BudgetSummary extends StatelessWidget {
     List<Record> recordList = await store.records.toList();
     num totalDue = 0;
     recordList.forEach((record){
-      int dayDue = int.parse(record.value[0]["dayDue"]);
+      DateTime dayDue = DBCommon().parseDayDue(record.value[0]["dayDue"]);
 
-      if(dayDue > bsModel.lastPayDay.day && dayDue <= bsModel.nextPayDay.day){
-        totalDue += int.parse(record.value[0]["amount"]);
+      if(DBCommon().dayDueInPayPeriod(dayDue, bsModel)){
+        totalDue += num.parse(record.value[0]["amount"]);
       }
     });
     return totalDue.toString();
@@ -140,10 +140,10 @@ class BudgetSummary extends StatelessWidget {
     List<Record> recordList = await store.records.toList();
     num totalDue = 0;
     recordList.forEach((record){
-      int dayDue = int.parse(record.value[0]["dayDue"]);
+      DateTime dayDue = DBCommon().parseDayDue(record.value[0]["dayDue"]);
 
-      if(dayDue > bsModel.lastPayDay.day && dayDue <= bsModel.nextPayDay.day && dayDue <= DateTime.now().day){
-        totalDue += int.parse(record.value[0]["amount"]);
+      if(DBCommon().dayDueInPayPeriod(dayDue, bsModel) && dayDue.difference(DateTime.now()).isNegative){
+        totalDue += num.parse(record.value[0]["amount"]);
       }
     });
     return totalDue.toString();
@@ -188,10 +188,10 @@ class BudgetSummary extends StatelessWidget {
     List<Record> recordList = await store.records.toList();
     num totalDue = 0;
     recordList.forEach((record){
-      int dayDue = int.parse(record.value[0]["dayDue"]);
+      DateTime dayDue = DBCommon().parseDayDue(record.value[0]["dayDue"]);
 
-      if(dayDue > bsModel.lastPayDay.day && dayDue <= bsModel.nextPayDay.day){
-        totalDue += int.parse(record.value[0]["amount"]);
+      if(DBCommon().dayDueInPayPeriod(dayDue, bsModel)){
+        totalDue += num.parse(record.value[0]["amount"]);
       }
     });
     num netBudget = bsModel.paycheck - totalDue;
