@@ -42,17 +42,6 @@ class HomePageState extends State<HomePage> {
     }
   }
   
-  _onSelectItem(int index) {
-    setState(() => _selectedDrawerIndex = index);
-    Navigator.of(context).pop(); // close the drawer
-  }
-
-  _loadPage(int index) {
-    setState(() {
-          _selectedDrawerIndex = index;
-        });
-  }
-
   @override
   Widget build(BuildContext context) {
     

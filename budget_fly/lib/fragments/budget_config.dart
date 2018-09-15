@@ -21,7 +21,7 @@ class BudgetConfig extends StatefulWidget {
    */
 
 class BudgetConfigState extends State<BudgetConfig> {
-  BudgetSettingsModel bsModel = null;
+  BudgetSettingsModel bsModel;
   TextEditingController _c;
   @override
   initState() {

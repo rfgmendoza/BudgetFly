@@ -156,9 +156,11 @@ class AddBudgetItemState extends State<AddBudgetItem> {
             ]))));
   }
 
+  
+
   void addtoLocalStore(BuildContext context) async {
     Store budgetStore = await DBCommon().getStore("budget");
-    _budgetItem.dayDue = _selectedDate.day;
+    _budgetItem.dayDue = DBCommon().setDateToNextMonth(_selectedDate);
     Record budgetItem = DBCommon().maptoRecord(budgetStore, _budgetItem);
     if (budgetItem.key != null) {
       await DBCommon().deleteBudgetItem(budgetItem);

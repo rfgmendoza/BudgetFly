@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:sembast/sembast.dart';
 import 'package:budget_fly/pages/home_page.dart';
 import 'package:budget_fly/share/database_common.dart'
-    show BudgetItemType, DBCommon, BudgetItem, BudgetSettingsModel;
+    show DBCommon, BudgetSettingsModel;
 
 class BudgetSummary extends StatelessWidget {
   @override
@@ -37,7 +37,8 @@ class BudgetSummary extends StatelessWidget {
     List<Record> recordList = await store.records.toList();
     num totalDue = 0;
     recordList.forEach((record){
-      DateTime dayDue = DateTime.parse(record.value[0]["dayDue"]);
+      DateTime dayDue = DBCommon().parseDayDue(record.value[0]["dayDue"]);
+      dayDue = DBCommon().setDateToNextMonth(dayDue);
 
       if(dayDue.day > bsModel.lastPayDay.day && dayDue.day <= bsModel.nextPayDay.day){
         totalDue += int.parse(record.value[0]["amount"]);
@@ -47,6 +48,10 @@ class BudgetSummary extends StatelessWidget {
     num returnValue = (bsModel.paycheck - totalDue) / totalDays;
     return returnValue.toStringAsFixed(2);
   }
+
+  
+
+  
 
   _spendPerDayCard() {
     return Card(

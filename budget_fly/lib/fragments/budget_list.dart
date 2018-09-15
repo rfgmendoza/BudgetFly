@@ -6,7 +6,7 @@ import '../fragments/add_budget_item.dart';
 import 'dart:async';
 import 'dart:io';
 import 'package:budget_fly/share/database_common.dart'
-    show DBCommon, BudgetItem, BudgetItemType;
+    show DBCommon, BudgetItem, BudgetItemType, BudgetSettingsModel;
 
 Future<List<Record>> fetchBudgetItems() async {
   Store storeOut;
@@ -23,18 +23,13 @@ List<BudgetItem> _buildList(AsyncSnapshot snapshot) {
   List<BudgetItem> items = new List<BudgetItem>();
   List<BudgetItem> topItems = new List<BudgetItem>();
   if (records != null) {
-    records.sort((a, b) => int
-        .parse(a.value[0]["dayDue"])
-        .compareTo(int.parse(b.value[0]["dayDue"])));
+    records.sort((a, b) => compareRecordDayDue(a,b));
 
-    // records.forEach((Record record){
-    //   if
-    // });
     DateTime now = new DateTime.now();
 
     records.forEach((Record record) {
       BudgetItem bi = DBCommon().mapToBudgetItem(record);
-      if (bi.dayDue.compareTo(now.day) >= 0) {
+      if (bi.dayDue.day.compareTo(now.day) >= 0) {
         topItems.add(bi);
       } else {
         items.add(bi);
@@ -43,6 +38,12 @@ List<BudgetItem> _buildList(AsyncSnapshot snapshot) {
     topItems.addAll(items);
   }
   return topItems;
+}
+
+int compareRecordDayDue(Record a, Record b){
+  DateTime aDate = DBCommon().parseDayDue(a.value[0]["dayDue"]);
+  DateTime bDate = DBCommon().parseDayDue(a.value[0]["dayDue"]);
+  return aDate.difference(bDate).inDays;
 }
 
 class BudgetList extends StatefulWidget {
@@ -142,7 +143,10 @@ _getIcon(BudgetItem budgetItem){
 }
 
 RichText _formateSubtitle(BudgetItem budgetItem) {
-
+  Color fontColor = Colors.blue;
+  if(budgetItem.dayDue.day <= DateTime.now().day ){
+    fontColor = Colors.grey;
+  }
 
   RichText subtitle = new RichText(
     text: new TextSpan(
@@ -159,9 +163,9 @@ RichText _formateSubtitle(BudgetItem budgetItem) {
             style: TextStyle(color: Colors.black)
           ),          
           new TextSpan(
-            text: budgetItem.dayDue.toString(),
+            text: budgetItem.dayDue.day.toString(),
             style: new TextStyle(
-              color: Colors.blue, 
+              color: fontColor, 
               fontWeight: FontWeight.bold, 
               
               ),
@@ -171,20 +175,8 @@ RichText _formateSubtitle(BudgetItem budgetItem) {
         ]
       )
     );
-  //subtitle += "\$" + budgetItem.amount.toString();
-  //subtitle += " due on: " + budgetItem.dayDue.toString();
+  
   return subtitle;
 }
 
-class _BudgetListItem extends ListTile {
-  _BudgetListItem(BudgetItem budgetItem)
-      : super(
-            isThreeLine: true,
-            title: new Text(budgetItem.name),
-            subtitle: new Text(budgetItem.dayDue.toString() +
-                " " +
-                budgetItem.amount.toString() +
-                " " +
-                budgetItem.itemType.toString().split('.')[1]),
-            onTap: () {});
-}
+

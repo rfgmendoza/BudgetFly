@@ -2,7 +2,7 @@ import 'package:sembast/sembast.dart';
 import 'package:sembast/sembast_io.dart';
 import 'package:path/path.dart';
 import 'dart:async';
-import 'dart:io' show Directory, sleep;
+import 'dart:io' show Directory;
 import 'package:path_provider/path_provider.dart';
 
 enum BudgetItemType { creditCard, bill, subscription }
@@ -43,7 +43,8 @@ class DBCommon {
     _budgetItem.name = recordValue["name"].trim();
     _budgetItem.amount = num.parse(recordValue["amount"]);
   
-    _budgetItem.dayDue = int.parse(recordValue["dayDue"]);
+    _budgetItem.dayDue = DBCommon().parseDayDue(recordValue["dayDue"]);
+    _budgetItem.dayDue = DBCommon().setDateToNextMonth(_budgetItem.dayDue);
 
     if (recordValue["itemType"].toString().contains("credit")) {
       _budgetItem.itemType = BudgetItemType.creditCard;
@@ -155,7 +156,6 @@ class DBCommon {
     if (bsModel.lastPayDay == null) {
       return bsModel;
     }
-    PayPeriodType type = bsModel.payPeriodType;
     DateTime lpd = bsModel.lastPayDay;
     DateTime npd = lpd;
     int day = lpd.day;
@@ -195,6 +195,33 @@ class DBCommon {
     
   }
 
+  DateTime parseDayOnlyFormat(String day){
+    DateTime now = DateTime.now();
+    DateTime outDate = DateTime(now.year, now.month, int.parse(day));
+    return outDate;
+  }
+
+  DateTime setDateToNextMonth(DateTime date){
+    if(date.difference(DateTime.now()).isNegative){
+      date = DateTime(date.year, date.month+1, date.day);
+    }
+    return date;
+  }
+
+  DateTime parseDayDue(String dayDue){
+    return DateTime.tryParse(dayDue) ?? parseDayOnlyFormat(dayDue);
+    
+  }
+
+  bool dayDueInPayPeriod(DateTime dayDue, BudgetSettingsModel settings){
+    if(dayDue.difference(settings.lastPayDay).isNegative){
+      if(!dayDue.difference(settings.nextPayDay).isNegative){
+        return true;
+      }
+    }
+    return false; 
+  }
+
   saveBudgetSettings(BudgetSettingsModel bsm) async {
     await db.put(bsm.paycheck, paycheck);
     await db.put(bsm.payPeriodType.toString(), payPeriodType);
@@ -223,7 +250,7 @@ class BudgetSettingsModel {
 class BudgetItem {
   String name;
   num amount;
-  int dayDue;
+  DateTime dayDue;
   BudgetItemType itemType;
   Record record;
 
