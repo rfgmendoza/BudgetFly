@@ -6,7 +6,7 @@ import '../fragments/add_budget_item.dart';
 import 'dart:async';
 import 'dart:io';
 import 'package:budget_fly/share/database_common.dart'
-    show DBCommon, BudgetItem, BudgetItemType, BudgetSettingsModel;
+    show DBCommon, BudgetItem, BudgetItemType;
 
 Future<List<Record>> fetchBudgetItems() async {
   Store storeOut;

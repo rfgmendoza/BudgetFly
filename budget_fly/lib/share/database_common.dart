@@ -43,8 +43,9 @@ class DBCommon {
     _budgetItem.name = recordValue["name"].trim();
     _budgetItem.amount = num.parse(recordValue["amount"]);
   
-    _budgetItem.dayDue = DBCommon().parseDayDue(recordValue["dayDue"]);
-    _budgetItem.dayDue = DBCommon().setDateToNextMonth(_budgetItem.dayDue);
+    _budgetItem.dayDue = parseDayDue(recordValue["dayDue"]);
+    
+    _budgetItem.dayDue = setDateToNextMonth(_budgetItem.dayDue);
 
     if (recordValue["itemType"].toString().contains("credit")) {
       _budgetItem.itemType = BudgetItemType.creditCard;
@@ -214,11 +215,20 @@ class DBCommon {
   }
 
   bool dayDueInPayPeriod(DateTime dayDue, BudgetSettingsModel settings){
-    if(dayDue.difference(settings.lastPayDay).isNegative){
-      if(!dayDue.difference(settings.nextPayDay).isNegative){
+    if(dayDue.difference(settings.nextPayDay).isNegative){
+      if(!dayDue.difference(settings.lastPayDay).isNegative){
+        print(dayDue.toString() + "in PayPeriod");
         return true;
       }
     }
+    else{
+      DateTime minusMonth = DateTime(dayDue.year, dayDue.month - 1, dayDue.day);
+      if(minusMonth.difference(settings.nextPayDay).isNegative && !minusMonth.difference(settings.lastPayDay).isNegative){
+        print(dayDue.toString() + "in PayPeriod");
+        return true;
+      }
+    }
+    print(dayDue.toString() + "not in PayPeriod");
     return false; 
   }
 

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:sembast/sembast.dart';
 import 'package:budget_fly/pages/home_page.dart';
 import 'package:budget_fly/share/database_common.dart'
-    show DBCommon, BudgetSettingsModel;
+    show DBCommon, BudgetSettingsModel, BudgetItem;
 
 class BudgetSummary extends StatelessWidget {
   @override
@@ -25,6 +25,42 @@ class BudgetSummary extends StatelessWidget {
           ],
         ));
   }
+  
+  num calculateTotalDueInPayPeriod(List<BudgetItem> recordList){
+    num total = 0;
+    recordList.forEach((item){
+      total+=item.amount;
+    });
+    return total;
+  }
+
+  int calculateDaysInPayPeriod(BudgetSettingsModel bsModel){
+    int days = 0;
+    days = bsModel.nextPayDay.difference(bsModel.lastPayDay).inDays;
+    return days;
+  }
+  
+  num calculateAmountDueSoFar(List<BudgetItem> recordList, BudgetSettingsModel bsModel){
+    num totalSoFar = 0;
+    recordList.forEach((item){
+      DateTime minusMonth = DateTime(item.dayDue.year, item.dayDue.month -1, item.dayDue.day);
+      if(DBCommon().dayDueInPayPeriod(minusMonth, bsModel)){
+        totalSoFar += item.amount;
+      }
+    }); 
+    return totalSoFar;
+  }
+
+  List<BudgetItem> getBillsInPayPeriod(List<Record> recordList, BudgetSettingsModel bsModel){
+    List<BudgetItem> listOut = new List<BudgetItem>();
+    recordList.forEach((record){
+      DateTime dayDue = DBCommon().parseDayDue(record.value[0]["dayDue"]);
+      if(DBCommon().dayDueInPayPeriod(dayDue, bsModel)){
+        listOut.add(DBCommon().mapToBudgetItem(record));
+      }
+    });
+    return listOut;
+  }
 
   Future<String> _getPerDiem() async {
     await DBCommon().openDBConnection();
@@ -35,16 +71,9 @@ class BudgetSummary extends StatelessWidget {
     
     Store store = await DBCommon().getStore("budget");
     List<Record> recordList = await store.records.toList();
-    num totalDue = 0;
-    recordList.forEach((record){
-      DateTime dayDue = DBCommon().parseDayDue(record.value[0]["dayDue"]);
-      dayDue = DBCommon().setDateToNextMonth(dayDue);
-
-      if(dayDue.day > bsModel.lastPayDay.day && dayDue.day <= bsModel.nextPayDay.day){
-        totalDue += num.parse(record.value[0]["amount"]);
-      }
-    });
-    num totalDays = (bsModel.nextPayDay.difference(bsModel.lastPayDay).inDays);
+    num totalDue = calculateTotalDueInPayPeriod(getBillsInPayPeriod(recordList, bsModel));
+    
+    num totalDays = calculateDaysInPayPeriod(bsModel);
     num returnValue = (bsModel.paycheck - totalDue) / totalDays;
     return returnValue.toStringAsFixed(2);
   }
@@ -90,14 +119,7 @@ class BudgetSummary extends StatelessWidget {
     
     Store store = await DBCommon().getStore("budget");
     List<Record> recordList = await store.records.toList();
-    num totalDue = 0;
-    recordList.forEach((record){
-      DateTime dayDue = DBCommon().parseDayDue(record.value[0]["dayDue"]);
-
-      if(DBCommon().dayDueInPayPeriod(dayDue, bsModel)){
-        totalDue += num.parse(record.value[0]["amount"]);
-      }
-    });
+    num totalDue = calculateTotalDueInPayPeriod(getBillsInPayPeriod(recordList, bsModel));
     return totalDue.toString();
   }
 
@@ -138,14 +160,7 @@ class BudgetSummary extends StatelessWidget {
     
     Store store = await DBCommon().getStore("budget");
     List<Record> recordList = await store.records.toList();
-    num totalDue = 0;
-    recordList.forEach((record){
-      DateTime dayDue = DBCommon().parseDayDue(record.value[0]["dayDue"]);
-
-      if(DBCommon().dayDueInPayPeriod(dayDue, bsModel) && dayDue.difference(DateTime.now()).isNegative){
-        totalDue += num.parse(record.value[0]["amount"]);
-      }
-    });
+    num totalDue = calculateAmountDueSoFar(getBillsInPayPeriod(recordList,bsModel),bsModel);
     return totalDue.toString();
   }
 
