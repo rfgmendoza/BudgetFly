@@ -38,6 +38,7 @@ class AddBudgetItemState extends State<AddBudgetItem> {
   Widget build(BuildContext context) {
     if (widget.budgetItem != null) {
       this._budgetItem = widget.budgetItem;
+      this._selectedDate = this._budgetItem.dayDue;
       editMode = true;
     }
     return new Scaffold(
@@ -74,7 +75,7 @@ class AddBudgetItemState extends State<AddBudgetItem> {
                   child: TextFormField(
                       decoration: InputDecoration(
                           hintText: "Amount", labelText: "Amount"),
-                      initialValue: _budgetItem.amount?.toString(),
+                      initialValue: _budgetItem.amount?.toStringAsFixed(2),
                       keyboardType: TextInputType.numberWithOptions(
                           signed: false, decimal: true),
                       onSaved: (String value) {

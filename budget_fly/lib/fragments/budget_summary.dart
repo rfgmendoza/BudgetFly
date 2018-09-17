@@ -201,16 +201,9 @@ class BudgetSummary extends StatelessWidget {
     
     Store store = await DBCommon().getStore("budget");
     List<Record> recordList = await store.records.toList();
-    num totalDue = 0;
-    recordList.forEach((record){
-      DateTime dayDue = DBCommon().parseDayDue(record.value[0]["dayDue"]);
-
-      if(DBCommon().dayDueInPayPeriod(dayDue, bsModel)){
-        totalDue += num.parse(record.value[0]["amount"]);
-      }
-    });
+    num totalDue = calculateTotalDueInPayPeriod(getBillsInPayPeriod(recordList, bsModel));
     num netBudget = bsModel.paycheck - totalDue;
-    return netBudget.toString();
+    return netBudget.toStringAsFixed(2);
   }
 
   _amountAvailableCard() {
