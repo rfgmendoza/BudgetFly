@@ -5,8 +5,12 @@ import 'package:sembast/sembast.dart';
 import 'package:budget_fly/pages/home_page.dart';
 import 'package:budget_fly/share/database_common.dart'
     show DBCommon, BudgetSettingsModel, BudgetItem;
+import 'package:flutter_circular_chart/flutter_circular_chart.dart';
 
 class BudgetSummary extends StatelessWidget {
+
+  final GlobalKey<AnimatedCircularChartState> _chartKey = new GlobalKey<AnimatedCircularChartState>();
+
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -22,6 +26,7 @@ class BudgetSummary extends StatelessWidget {
             _totalDueCard(),
             _paidSoFarCard(),
             _amountAvailableCard(),
+            _chartCard(),
           ],
         ));
   }
@@ -232,5 +237,56 @@ class BudgetSummary extends StatelessWidget {
         }
       )
     ]));
+  }
+
+  Future<List<CircularStackEntry>> _getChartData() async {
+    List<num> numList = new List<num>();
+    var amountAvailable = await _getAmountAvailable();
+    numList.add(num.parse(amountAvailable));
+    var totalDue = await _getTotalDue();
+    numList.add(num.parse(totalDue));
+
+    List<CircularStackEntry> outList = <CircularStackEntry>[
+  new CircularStackEntry(
+    <CircularSegmentEntry>[
+      new CircularSegmentEntry(numList[0], Colors.green[200], rankKey: 'b1'),
+      new CircularSegmentEntry(numList[1], Colors.red[200], rankKey: 'b2'),
+  ],
+    rankKey: 'Budget',
+  ),
+];
+  
+    return outList;
+  }
+
+  _chartCard() {
+    return 
+      FutureBuilder(
+        future: _getChartData(),
+        builder: (context, snapshot) {
+          switch (snapshot.connectionState){
+            case ConnectionState.none:
+            case ConnectionState.waiting:
+              return new CircularProgressIndicator();
+            default:
+              if(snapshot.hasData) {
+                if(snapshot.data !=null){
+                  return AnimatedCircularChart(
+                    holeRadius: 50.0,
+                    holeLabel: "Totals:\n\$"+snapshot.data[0].entries[0].value.toString()+" available \n\$"+snapshot.data[0].entries[1].value.toString()+" due",
+                    key: _chartKey,
+                    initialChartData: snapshot.data,
+                    chartType: CircularChartType.Radial,
+                    size: Size.square(250.0)
+                    );
+
+                }
+              }
+              else if(snapshot.hasError)
+                return Text("${snapshot.error}");
+          }
+        }
+      );
+    
   }
 }
