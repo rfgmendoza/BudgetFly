@@ -19,7 +19,7 @@ class AddBudgetItemState extends State<AddBudgetItem> {
   DateTime _selectedDate;
   BudgetItem _budgetItem = BudgetItem();
   bool editMode = false;
-
+  bool addAnother = false;
   void _showDatePicker() async {
     DateTime now = DateTime.now();
     final DateTime selectedDate = await showDatePicker(
@@ -129,23 +129,55 @@ class AddBudgetItemState extends State<AddBudgetItem> {
                   });
                 },
               ),
-              Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16.0),
-                  child: RaisedButton(
-                    onPressed: () {
-                      // Validate will return true if the form is valid, or false if
-                      // the form is invalid.
-                      if (_formKey.currentState.validate()) {
-                        // If the form is valid, display a snackbar. In the real world, you'd
-                        // often want to call a server or save the information in a database
-                        // Scaffold.of(context).showSnackBar(
-                        //     SnackBar(content: Text('Processing Data')));
-                        _formKey.currentState.save();
-                        addtoLocalStore(context);
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  
+                  
+                    Checkbox(
+                      
+                      value: addAnother,
+                      onChanged: (bool value){
+                        setState((){
+                          addAnother = value;
+                        });
                       }
-                    },
-                    child: !editMode ? Text('Add') : Text('Save'),
-                  )),
+                    ),
+                              Text("Add Another"),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16.0),
+                      child: RaisedButton(
+                        onPressed: () {
+                          // Validate will return true if the form is valid, or false if
+                          // the form is invalid.
+                          if (_formKey.currentState.validate()) {
+                            // If the form is valid, display a snackbar. In the real world, you'd
+                            // often want to call a server or save the information in a database
+                            // Scaffold.of(context).showSnackBar(
+                            //     SnackBar(content: Text('Processing Data')));
+                            _formKey.currentState.save();
+                            addtoLocalStore(context);
+                          }
+                        },
+                        child: !editMode ? Text('Add') : Text('Save'),
+                      )),
+                      Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16.0),
+                      child: RaisedButton(
+                        onPressed: () {
+                          _formKey.currentState.reset();
+                          _reset();
+                        },
+                        child: Text('Reset'),
+                      )),
+                ],
+                
+              ),
               // Padding(
               //     padding: const EdgeInsets.symmetric(vertical: 16.0),
               //     child: RaisedButton(
@@ -167,8 +199,12 @@ class AddBudgetItemState extends State<AddBudgetItem> {
       await DBCommon().deleteBudgetItem(budgetItem);
     }
     DBCommon.db.putRecord(budgetItem);
-
-    Navigator.pop(context);
+    if(!addAnother){
+      Navigator.popAndPushNamed(context, "/list");
+    }
+    else{
+      _reset();
+    }
   }
 
   void checkLocalStore(BuildContext context) async {
@@ -180,5 +216,11 @@ class AddBudgetItemState extends State<AddBudgetItem> {
       Scaffold
           .of(context)
           .showSnackBar(SnackBar(content: Text(count.toString())));
+  }
+
+  _reset(){
+    setState(() {
+          _budgetItem = null;
+        });
   }
 }
