@@ -21,21 +21,26 @@ class BudgetSummary extends StatelessWidget {
         ),
         drawer: getDrawer(context),
         body: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisSize: MainAxisSize.max,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             _chartCard(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            Expanded(child:Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _totalDueCard(),
-                _paidSoFarCard(),
+                Expanded(child:_totalDueCard()),
+                Expanded(child:_paidSoFarCard()),
               ]
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            )),
+            Expanded(child:Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [              
-              _spendPerDayCard(),
-              _amountAvailableCard(),
-            ])
+              Expanded(child:_spendPerDayCard()),
+              Expanded(child:_amountAvailableCard()),
+            ]))
             
             
             
@@ -100,37 +105,7 @@ class BudgetSummary extends StatelessWidget {
 
   
 
-  _spendPerDayCard() {
-    return Card(
-      
-        child: 
-      FutureBuilder(
-        future: _getPerDiem(),
-        builder: (context, snapshot) {
-          switch (snapshot.connectionState){
-            case ConnectionState.none:
-            case ConnectionState.waiting:
-              return new CircularProgressIndicator();
-            default:
-              if(snapshot.hasData) {
-                if(snapshot.data !=null){
-                  return Column(
-                  
-                    children:[
-                    Text("Daily Free Budget"),
-                    Text("\$${snapshot.data}"),
-                  ]
-                  );
-
-                }
-              }
-              else if(snapshot.hasError)
-                return Text("${snapshot.error}");
-          }
-        }
-      )
-    );
-  }
+  
 
   Future<String> _getTotalDue() async {
     await DBCommon().openDBConnection();
@@ -145,34 +120,7 @@ class BudgetSummary extends StatelessWidget {
     return totalDue.toStringAsFixed(2);
   }
 
-  _totalDueCard() {
-    return Card(
-        child: 
-      FutureBuilder(
-        future: _getTotalDue(),
-        builder: (context, snapshot) {
-          switch (snapshot.connectionState){
-            case ConnectionState.none:
-            case ConnectionState.waiting:
-              return new CircularProgressIndicator();
-            default:
-              if(snapshot.hasData) {
-                if(snapshot.data !=null){
-                  return Column(
-                    children:
-                    [Text("Total Due For Bills"),
-                    Text("\$${snapshot.data}")]
-                  );
-
-                }
-              }
-              else if(snapshot.hasError)
-                return Text("${snapshot.error}");
-          }
-        }
-      )
-    );
-  }
+  
 
   Future<String> _getPaidSoFar() async {
     await DBCommon().openDBConnection();
@@ -187,34 +135,7 @@ class BudgetSummary extends StatelessWidget {
     return totalDue.toStringAsFixed(2);
   }
 
-  _paidSoFarCard() {
-    return Card(
-        child: FutureBuilder(
-        future: _getPaidSoFar(),
-        builder: (context, snapshot) {
-          switch (snapshot.connectionState){
-            case ConnectionState.none:
-            case ConnectionState.waiting:
-              return new CircularProgressIndicator();
-            default:
-              if(snapshot.hasData) {
-                if(snapshot.data !=null){
-                  return Column(
-                    children:[
-                    Text("Amount Paid So Far"),
-                    Text("\$${snapshot.data}"),
-                    ]
-                  );
-
-                }
-              }
-              else if(snapshot.hasError)
-                return Text("${snapshot.error}");
-          }
-        }
-      )
-    );
-  }
+  
 
   Future<String> _getAmountAvailable() async {
     await DBCommon().openDBConnection();
@@ -230,35 +151,7 @@ class BudgetSummary extends StatelessWidget {
     return netBudget.toStringAsFixed(2);
   }
 
-  _amountAvailableCard() {
-    return Card(
-        child: 
-      FutureBuilder(
-        future: _getAmountAvailable(),
-        builder: (context, snapshot) {
-          switch (snapshot.connectionState){
-            case ConnectionState.none:
-            case ConnectionState.waiting:
-              return new CircularProgressIndicator();
-            default:
-              if(snapshot.hasData) {
-                if(snapshot.data !=null){
-                  return Column(
-                    children: [
-                    Text("Total Amount Available"),
-                    Text("\$${snapshot.data}"),
-                    ]
-                  );
-
-                }
-              }
-              else if(snapshot.hasError)
-                return Text("${snapshot.error}");
-          }
-        }
-      )
-    );
-  }
+  
 
   Future<List<CircularStackEntry>> _getChartData() async {
     List<num> numList = new List<num>();
@@ -294,12 +187,14 @@ class BudgetSummary extends StatelessWidget {
               if(snapshot.hasData) {
                 if(snapshot.data !=null){
                   return AnimatedCircularChart(
+                    labelStyle: new TextStyle(fontSize: 24.0, color: Colors.green),
                     holeRadius: 50.0,
-                    holeLabel: "Totals:\n\$"+snapshot.data[0].entries[0].value.toStringAsFixed(2)+" due\n\$"+snapshot.data[0].entries[1].value.toStringAsFixed(2)+" available ",
+                    holeLabel: "\$"+snapshot.data[0].entries[1].value.toStringAsFixed(2)+"\nAvailable ",
                     key: _chartKey,
                     initialChartData: snapshot.data,
                     chartType: CircularChartType.Radial,
-                    size: Size.square(250.0)
+                    edgeStyle: SegmentEdgeStyle.round,
+                    size: Size.square(400.0)
                     );
 
                 }
@@ -309,6 +204,62 @@ class BudgetSummary extends StatelessWidget {
           }
         }
       );
+    
+  }
+
+  Card _buildSummaryCard(Future future, String title, Color color){
+    return Card(
+      color: color,
+        child: 
+      FutureBuilder(
+        future: future,
+        builder: (context, snapshot) {
+          switch (snapshot.connectionState){
+            case ConnectionState.none:
+            case ConnectionState.waiting:
+              return new CircularProgressIndicator();
+            default:
+              if(snapshot.hasData) {
+                if(snapshot.data !=null){
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.max,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text("\$${snapshot.data}", style: TextStyle(fontSize: 32.0, fontWeight: FontWeight.bold, color: Colors.white),),
+                      ),
+                    Text(title, textAlign: TextAlign.center, style: TextStyle(fontSize: 16.0, ),),
+                    
+                    ]
+                  );
+
+                }
+              }
+              else if(snapshot.hasError)
+                return Text("${snapshot.error}");
+          }
+        }
+      )
+    );
+  }
+  _amountAvailableCard() {
+    return _buildSummaryCard(_getAmountAvailable(), "Total Amount Available", Colors.green[200]);
+    
+  }
+  _paidSoFarCard() {
+    return _buildSummaryCard(_getPaidSoFar(), "Amount Paid So Far", Colors.red[300]);
+    
+  }
+
+  _totalDueCard() {
+    return _buildSummaryCard(_getTotalDue(), "Total Amount Due", Colors.red[200]);
+    
+  }
+
+  _spendPerDayCard() {
+    return _buildSummaryCard(_getPerDiem(), "Amount Available Per Day", Colors.green[100]);
     
   }
 }
