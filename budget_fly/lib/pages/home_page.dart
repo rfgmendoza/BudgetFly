@@ -100,9 +100,20 @@ Drawer getDrawer(BuildContext context){
 
   return new Drawer(
         child: new Column(
+          
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            new UserAccountsDrawerHeader(
-                accountName: new Text("John Doe"), accountEmail: null),
+            new DrawerHeader(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text("Budget Fly", style: TextStyle(color: Colors.white, fontSize: 20.0),),
+                ],
+              ),
+              decoration: BoxDecoration(color: Colors.green),
+            ),
+          
             new Column(children: drawerOptions)
           ],
         ),

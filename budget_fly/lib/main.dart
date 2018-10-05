@@ -14,7 +14,12 @@ class MyApp extends StatelessWidget {
     return new MaterialApp(
       title: 'NavigationDrawer Demo',
       theme: new ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.green,
+        accentColor: Colors.lightGreen,
+        splashColor: Colors.greenAccent,
+        buttonColor: Colors.green[300],
+        scaffoldBackgroundColor: Colors.white,
+        
       ),
       home: new BudgetSummary(),
       routes: <String, WidgetBuilder> {

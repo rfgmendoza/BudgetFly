@@ -149,9 +149,7 @@ class BudgetSummary extends StatelessWidget {
     num totalDue = calculateTotalDueInPayPeriod(getBillsInPayPeriod(recordList, bsModel));
     num netBudget = bsModel.paycheck - totalDue;
     return netBudget.toStringAsFixed(2);
-  }
-
-  
+  }  
 
   Future<List<CircularStackEntry>> _getChartData() async {
     List<num> numList = new List<num>();
@@ -186,16 +184,20 @@ class BudgetSummary extends StatelessWidget {
             default:
               if(snapshot.hasData) {
                 if(snapshot.data !=null){
-                  return AnimatedCircularChart(
-                    labelStyle: new TextStyle(fontSize: 24.0, color: Colors.green),
-                    holeRadius: 50.0,
-                    holeLabel: "\$"+snapshot.data[0].entries[1].value.toStringAsFixed(2)+"\nAvailable ",
-                    key: _chartKey,
-                    initialChartData: snapshot.data,
-                    chartType: CircularChartType.Radial,
-                    edgeStyle: SegmentEdgeStyle.round,
-                    size: Size.square(400.0)
-                    );
+                  return Column(
+                    children: <Widget>[
+                      AnimatedCircularChart(
+                        labelStyle: new TextStyle(fontSize: 24.0, color: Colors.green),
+                        holeRadius: 50.0,
+                        holeLabel: "\$"+snapshot.data[0].entries[1].value.toStringAsFixed(2)+"\nAvailable ",
+                        key: _chartKey,
+                        initialChartData: snapshot.data,
+                        chartType: CircularChartType.Radial,
+                        edgeStyle: SegmentEdgeStyle.round,
+                        size: Size.square(400.0)
+                        ),
+                    ],
+                  );
 
                 }
               }
