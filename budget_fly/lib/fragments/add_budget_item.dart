@@ -26,12 +26,11 @@ class AddBudgetItemState extends State<AddBudgetItem> {
         context: context,
         initialDate: _selectedDate != null ? _selectedDate : now,
         firstDate: now,
-        lastDate: now.add(Duration(days: 31))
-    );
+        lastDate: now.add(Duration(days: 31)));
 
     setState(() {
-          _selectedDate = selectedDate;
-        });
+      _selectedDate = selectedDate;
+    });
   }
 
   @override
@@ -89,16 +88,15 @@ class AddBudgetItemState extends State<AddBudgetItem> {
               Padding(
                   padding: EdgeInsets.all(8.0),
                   child: RaisedButton(
-                    onPressed: () => _showDatePicker(),
-                    child: ListTile(
-                      title: Text("Date Due"),
-                      subtitle: _selectedDate != null 
-                        ? Text(_selectedDate.month.toString() +" \\ " +_selectedDate.day.toString())
-                        : Text("Not set yet!"),
-                      trailing: Icon(Icons.mode_edit)
-                    )
-                  )
-                  ),
+                      onPressed: () => _showDatePicker(),
+                      child: ListTile(
+                          title: Text("Date Due"),
+                          subtitle: _selectedDate != null
+                              ? Text(_selectedDate.month.toString() +
+                                  " \\ " +
+                                  _selectedDate.day.toString())
+                              : Text("Not set yet!"),
+                          trailing: Icon(Icons.mode_edit)))),
               RadioListTile<BudgetItemType>(
                 title: const Text('Credit Card'),
                 value: BudgetItemType.creditCard,
@@ -132,18 +130,14 @@ class AddBudgetItemState extends State<AddBudgetItem> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  
-                  
-                    Checkbox(
-                      
+                  Checkbox(
                       value: addAnother,
-                      onChanged: (bool value){
-                        setState((){
+                      onChanged: (bool value) {
+                        setState(() {
                           addAnother = value;
                         });
-                      }
-                    ),
-                              Text("Add Another"),
+                      }),
+                  Text("Add Another"),
                 ],
               ),
               Row(
@@ -166,7 +160,7 @@ class AddBudgetItemState extends State<AddBudgetItem> {
                         },
                         child: !editMode ? Text('Add') : Text('Save'),
                       )),
-                      Padding(
+                  Padding(
                       padding: const EdgeInsets.symmetric(vertical: 16.0),
                       child: RaisedButton(
                         onPressed: () {
@@ -176,7 +170,6 @@ class AddBudgetItemState extends State<AddBudgetItem> {
                         child: Text('Reset'),
                       )),
                 ],
-                
               ),
               // Padding(
               //     padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -189,8 +182,6 @@ class AddBudgetItemState extends State<AddBudgetItem> {
             ]))));
   }
 
-  
-
   void addtoLocalStore(BuildContext context) async {
     Store budgetStore = await DBCommon().getStore("budget");
     _budgetItem.dayDue = DBCommon().setDateToNextMonth(_selectedDate);
@@ -199,10 +190,10 @@ class AddBudgetItemState extends State<AddBudgetItem> {
       await DBCommon().deleteBudgetItem(budgetItem);
     }
     DBCommon.db.putRecord(budgetItem);
-    if(!addAnother){
+    if (!addAnother) {
       Navigator.popAndPushNamed(context, "/list");
-    }
-    else{
+    } else {
+      _formKey.currentState.reset();
       _reset();
     }
   }
@@ -213,14 +204,13 @@ class AddBudgetItemState extends State<AddBudgetItem> {
     num count = await budgetStore.count();
 
     if (count != null)
-      Scaffold
-          .of(context)
+      Scaffold.of(context)
           .showSnackBar(SnackBar(content: Text(count.toString())));
   }
 
-  _reset(){
+  _reset() {
     setState(() {
-          _budgetItem = null;
-        });
+      _budgetItem = BudgetItem();
+    });
   }
 }

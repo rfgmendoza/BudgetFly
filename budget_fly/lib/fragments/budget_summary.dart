@@ -22,11 +22,24 @@ class BudgetSummary extends StatelessWidget {
         drawer: getDrawer(context),
         body: Column(
           children: <Widget>[
-            _spendPerDayCard(),
-            _totalDueCard(),
-            _paidSoFarCard(),
-            _amountAvailableCard(),
             _chartCard(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _totalDueCard(),
+                _paidSoFarCard(),
+              ]
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [              
+              _spendPerDayCard(),
+              _amountAvailableCard(),
+            ])
+            
+            
+            
+            
           ],
         ));
   }
@@ -89,7 +102,8 @@ class BudgetSummary extends StatelessWidget {
 
   _spendPerDayCard() {
     return Card(
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
+      
+        child: 
       FutureBuilder(
         future: _getPerDiem(),
         builder: (context, snapshot) {
@@ -100,9 +114,12 @@ class BudgetSummary extends StatelessWidget {
             default:
               if(snapshot.hasData) {
                 if(snapshot.data !=null){
-                  return ListTile(
-                    title: Text("Daily Free Budget"),
-                    subtitle: Text("\$${snapshot.data}"),
+                  return Column(
+                  
+                    children:[
+                    Text("Daily Free Budget"),
+                    Text("\$${snapshot.data}"),
+                  ]
                   );
 
                 }
@@ -112,7 +129,7 @@ class BudgetSummary extends StatelessWidget {
           }
         }
       )
-    ]));
+    );
   }
 
   Future<String> _getTotalDue() async {
@@ -125,12 +142,12 @@ class BudgetSummary extends StatelessWidget {
     Store store = await DBCommon().getStore("budget");
     List<Record> recordList = await store.records.toList();
     num totalDue = calculateTotalDueInPayPeriod(getBillsInPayPeriod(recordList, bsModel));
-    return totalDue.toString();
+    return totalDue.toStringAsFixed(2);
   }
 
   _totalDueCard() {
     return Card(
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
+        child: 
       FutureBuilder(
         future: _getTotalDue(),
         builder: (context, snapshot) {
@@ -141,9 +158,10 @@ class BudgetSummary extends StatelessWidget {
             default:
               if(snapshot.hasData) {
                 if(snapshot.data !=null){
-                  return ListTile(
-                    title: Text("Total Due For Bills"),
-                    subtitle: Text("\$${snapshot.data}"),
+                  return Column(
+                    children:
+                    [Text("Total Due For Bills"),
+                    Text("\$${snapshot.data}")]
                   );
 
                 }
@@ -153,7 +171,7 @@ class BudgetSummary extends StatelessWidget {
           }
         }
       )
-    ]));
+    );
   }
 
   Future<String> _getPaidSoFar() async {
@@ -166,13 +184,12 @@ class BudgetSummary extends StatelessWidget {
     Store store = await DBCommon().getStore("budget");
     List<Record> recordList = await store.records.toList();
     num totalDue = calculateAmountDueSoFar(getBillsInPayPeriod(recordList,bsModel),bsModel);
-    return totalDue.toString();
+    return totalDue.toStringAsFixed(2);
   }
 
   _paidSoFarCard() {
     return Card(
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-      FutureBuilder(
+        child: FutureBuilder(
         future: _getPaidSoFar(),
         builder: (context, snapshot) {
           switch (snapshot.connectionState){
@@ -182,9 +199,11 @@ class BudgetSummary extends StatelessWidget {
             default:
               if(snapshot.hasData) {
                 if(snapshot.data !=null){
-                  return ListTile(
-                    title: Text("Amount Paid So Far"),
-                    subtitle: Text("\$${snapshot.data}"),
+                  return Column(
+                    children:[
+                    Text("Amount Paid So Far"),
+                    Text("\$${snapshot.data}"),
+                    ]
                   );
 
                 }
@@ -194,7 +213,7 @@ class BudgetSummary extends StatelessWidget {
           }
         }
       )
-    ]));
+    );
   }
 
   Future<String> _getAmountAvailable() async {
@@ -213,7 +232,7 @@ class BudgetSummary extends StatelessWidget {
 
   _amountAvailableCard() {
     return Card(
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
+        child: 
       FutureBuilder(
         future: _getAmountAvailable(),
         builder: (context, snapshot) {
@@ -224,9 +243,11 @@ class BudgetSummary extends StatelessWidget {
             default:
               if(snapshot.hasData) {
                 if(snapshot.data !=null){
-                  return ListTile(
-                    title: Text("Total Amount Available"),
-                    subtitle: Text("\$${snapshot.data}"),
+                  return Column(
+                    children: [
+                    Text("Total Amount Available"),
+                    Text("\$${snapshot.data}"),
+                    ]
                   );
 
                 }
@@ -236,7 +257,7 @@ class BudgetSummary extends StatelessWidget {
           }
         }
       )
-    ]));
+    );
   }
 
   Future<List<CircularStackEntry>> _getChartData() async {
@@ -249,8 +270,9 @@ class BudgetSummary extends StatelessWidget {
     List<CircularStackEntry> outList = <CircularStackEntry>[
   new CircularStackEntry(
     <CircularSegmentEntry>[
-      new CircularSegmentEntry(numList[0], Colors.green[200], rankKey: 'b1'),
-      new CircularSegmentEntry(numList[1], Colors.red[200], rankKey: 'b2'),
+      
+      new CircularSegmentEntry(numList[1].toDouble(), Colors.red[200], rankKey: 'b1'),
+      new CircularSegmentEntry(numList[0].toDouble(), Colors.green[200], rankKey: 'b2'),
   ],
     rankKey: 'Budget',
   ),
@@ -273,7 +295,7 @@ class BudgetSummary extends StatelessWidget {
                 if(snapshot.data !=null){
                   return AnimatedCircularChart(
                     holeRadius: 50.0,
-                    holeLabel: "Totals:\n\$"+snapshot.data[0].entries[0].value.toString()+" available \n\$"+snapshot.data[0].entries[1].value.toString()+" due",
+                    holeLabel: "Totals:\n\$"+snapshot.data[0].entries[0].value.toStringAsFixed(2)+" due\n\$"+snapshot.data[0].entries[1].value.toStringAsFixed(2)+" available ",
                     key: _chartKey,
                     initialChartData: snapshot.data,
                     chartType: CircularChartType.Radial,
