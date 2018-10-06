@@ -10,6 +10,7 @@ import 'package:budget_fly/share/database_common.dart'
 
 Future<List<Record>> fetchBudgetItems() async {
   Store storeOut;
+  
   await DBCommon().getStore("budget").then((store) => storeOut = store);
 
   if (storeOut != null)

@@ -61,8 +61,21 @@ class BudgetConfigState extends State<BudgetConfig> {
                       _getPaySchedule(),
                       // Divider(),
                       _getLastPayDay(),
-                      Divider()
-                      //payCheckCard(),
+                      Divider(),
+                      Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Checkbox(
+                      value: bsModel.testData,
+                      onChanged: (bool value) {
+                        setState(() {
+                          bsModel.testData = value;
+                          DBCommon().saveBudgetSettings(bsModel);
+                        });
+                      }),
+                  Text("Use test data (requires restart)"),
+                ],
+              ),
                     ],
                   );
                 } else if (snapshot.hasError) return Text("${snapshot.error}");

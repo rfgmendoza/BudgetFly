@@ -154,9 +154,9 @@ class BudgetSummary extends StatelessWidget {
   Future<List<CircularStackEntry>> _getChartData() async {
     List<num> numList = new List<num>();
     var amountAvailable = await _getAmountAvailable();
-    numList.add(num.parse(amountAvailable));
+    numList.add(num.tryParse(amountAvailable)??0.0);
     var totalDue = await _getTotalDue();
-    numList.add(num.parse(totalDue));
+    numList.add(num.tryParse(totalDue)??0.0);
 
     List<CircularStackEntry> outList = <CircularStackEntry>[
   new CircularStackEntry(

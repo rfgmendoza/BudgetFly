@@ -17,6 +17,8 @@ class DBCommon {
   String frequency = "frequency";
   String lastPayDay = "lastpayday";
   String nextPayDay = "nextpayday";
+  String testData = "testData";
+  bool testDataValue;
 
   Future openDBConnection() async {
     if (db == null) {
@@ -30,8 +32,12 @@ class DBCommon {
   }
 
   Future<Store> getStore(String store) async {
+    
     await openDBConnection();
     if (db != null)
+    if(testDataValue ?? false)
+      return db.getStore(store+"test");
+    else
       return db.getStore(store);
     else
       return null;
@@ -92,14 +98,20 @@ class DBCommon {
   }
 
   Future<BudgetSettingsModel> getBudgetSettings(bsModel) async {
-    if (bsModel != null) return bsModel;
+    if (bsModel != null && bsModel) return bsModel;
 
     await openDBConnection();
     BudgetSettingsModel bsm = new BudgetSettingsModel();
+    String testDataString = await db.get(testData);
+    bsm.testData = testDataString.toLowerCase() == "true";
+    this.testDataValue = bsm.testData;
+    String suffix = "";
+    if(!this.testDataValue){
+        suffix = "test";
+    }
+    bsm.paycheck = await db.get(paycheck+suffix) as num ?? 0;
 
-    bsm.paycheck = await db.get(paycheck) as num ?? 0;
-
-    String ppt = await db.get(payPeriodType);
+    String ppt = await db.get(payPeriodType+suffix);
     switch (ppt != null ? ppt.split('.')[1] : null) {
       case "weekly":
         bsm.payPeriodType = PayPeriodType.weekly;
@@ -117,14 +129,13 @@ class DBCommon {
         bsm.payPeriodType = PayPeriodType.weekly;
     }
 
-    bsm.monthlyFrequency = await db.get(frequency) as num ?? 1;
-    var lpd = await db.get(lastPayDay);
+    bsm.monthlyFrequency = await db.get(frequency+suffix) as num ?? 1;
+    var lpd = await db.get(lastPayDay+suffix);
     bsm.lastPayDay = lpd != "null" && lpd != null ? DateTime.parse(lpd) : null;
-    var npd = await db.get(nextPayDay);
+    var npd = await db.get(nextPayDay+suffix);
     bsm.nextPayDay = npd != "null" && npd != null ? DateTime.parse(npd) : null;
-
+       
     bsm = updatePayDays(bsm);
-
     return bsm;
   }
 
@@ -233,11 +244,16 @@ class DBCommon {
   }
 
   saveBudgetSettings(BudgetSettingsModel bsm) async {
-    await db.put(bsm.paycheck, paycheck);
-    await db.put(bsm.payPeriodType.toString(), payPeriodType);
-    await db.put(bsm.monthlyFrequency, frequency);
-    await db.put(bsm.lastPayDay.toString(), lastPayDay);
-    await db.put(bsm.nextPayDay.toString(), nextPayDay);
+    String suffix = "";
+    if(bsm.testData){
+      suffix = "test";
+    }
+    await db.put(bsm.paycheck, paycheck+suffix);
+    await db.put(bsm.payPeriodType.toString(), payPeriodType+suffix);
+    await db.put(bsm.monthlyFrequency, frequency+suffix);
+    await db.put(bsm.lastPayDay.toString(), lastPayDay+suffix);
+    await db.put(bsm.nextPayDay.toString(), nextPayDay+suffix);
+    await db.put(bsm.testData.toString(), testData);
   }
 }
 
@@ -247,6 +263,7 @@ class BudgetSettingsModel {
   int monthlyFrequency;
   DateTime lastPayDay;
   DateTime nextPayDay;
+  bool testData;
 
   BudgetSettingsModel() {
     paycheck = null;
@@ -254,6 +271,7 @@ class BudgetSettingsModel {
     monthlyFrequency = null;
     lastPayDay = null;
     nextPayDay = null;
+    testData = false;
   }
 }
 
@@ -272,3 +290,5 @@ class BudgetItem {
     itemType = BudgetItemType.creditCard;
   }
 }
+
+
