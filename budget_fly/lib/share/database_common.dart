@@ -122,7 +122,7 @@ class DBCommon {
     bsm.lastPayDay = lpd != "null" && lpd != null ? DateTime.parse(lpd) : null;
     var npd = await db.get(nextPayDay);
     bsm.nextPayDay = npd != "null" && npd != null ? DateTime.parse(npd) : null;
-
+    
     bsm = updatePayDays(bsm);
 
     return bsm;
