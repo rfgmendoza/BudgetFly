@@ -90,7 +90,7 @@ class BudgetSummary extends StatelessWidget {
     BudgetSettingsModel bsModel = await DBCommon().getBudgetSettings(null);
     
     if(bsModel.lastPayDay == null || bsModel.nextPayDay == null)
-      return "0 Pay days not set";
+      return "0";
     
     Store store = await DBCommon().getStore("budget");
     List<Record> recordList = await store.records.toList();
@@ -112,7 +112,7 @@ class BudgetSummary extends StatelessWidget {
     BudgetSettingsModel bsModel = await DBCommon().getBudgetSettings(null);
     
     if(bsModel.lastPayDay == null || bsModel.nextPayDay == null)
-      return "0 Pay days not set";
+      return "0";
     
     Store store = await DBCommon().getStore("budget");
     List<Record> recordList = await store.records.toList();
@@ -127,7 +127,7 @@ class BudgetSummary extends StatelessWidget {
     BudgetSettingsModel bsModel = await DBCommon().getBudgetSettings(null);
     
     if(bsModel.lastPayDay == null || bsModel.nextPayDay == null)
-      return "0 Pay days not set";
+      return "0";
     
     Store store = await DBCommon().getStore("budget");
     List<Record> recordList = await store.records.toList();
@@ -142,7 +142,7 @@ class BudgetSummary extends StatelessWidget {
     BudgetSettingsModel bsModel = await DBCommon().getBudgetSettings(null);
     
     if(bsModel.lastPayDay == null || bsModel.nextPayDay == null)
-      return "0 Pay days not set";
+      return "0";
     
     Store store = await DBCommon().getStore("budget");
     List<Record> recordList = await store.records.toList();
@@ -156,7 +156,7 @@ class BudgetSummary extends StatelessWidget {
     var amountAvailable = await _getAmountAvailable();
     numList.add(num.tryParse(amountAvailable)??0.0);
     var totalDue = await _getTotalDue();
-    numList.add(num.tryParse(totalDue)??0.0);
+    numList.add(num.tryParse(totalDue)??0.0);    
 
     List<CircularStackEntry> outList = <CircularStackEntry>[
   new CircularStackEntry(
@@ -184,8 +184,11 @@ class BudgetSummary extends StatelessWidget {
             default:
               if(snapshot.hasData) {
                 if(snapshot.data !=null){
-                  return Column(
-                    children: <Widget>[
+                  if(snapshot.data[0].entries[1].value ==0.0){
+                       Container(); 
+                      }
+                  
+                      
                       AnimatedCircularChart(
                         labelStyle: new TextStyle(fontSize: 24.0, color: Colors.green),
                         holeRadius: 50.0,
@@ -195,9 +198,8 @@ class BudgetSummary extends StatelessWidget {
                         chartType: CircularChartType.Radial,
                         edgeStyle: SegmentEdgeStyle.round,
                         size: Size.square(400.0)
-                        ),
-                    ],
-                  );
+                        );
+                    
 
                 }
               }

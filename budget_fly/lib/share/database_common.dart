@@ -102,11 +102,11 @@ class DBCommon {
 
     await openDBConnection();
     BudgetSettingsModel bsm = new BudgetSettingsModel();
-    String testDataString = await db.get(testData);
+    String testDataString = await db.get(testData) ?? "false";
     bsm.testData = testDataString.toLowerCase() == "true";
     this.testDataValue = bsm.testData;
     String suffix = "";
-    if(!this.testDataValue){
+    if(this.testDataValue){
         suffix = "test";
     }
     bsm.paycheck = await db.get(paycheck+suffix) as num ?? 0;
